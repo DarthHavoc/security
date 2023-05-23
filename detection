@@ -15,3 +15,49 @@ We further refine the search by checking for specific process names (net.exe, wm
 The stats command is then used to count the occurrences of each event code and process name combination.
 
 By running this search, you can identify instances where the specified processes were created or PowerShell script blocks were logged, indicating potential activities related to gathering victim host information and client configurations.
+
+-----------
+To detect for T1056 activity in Splunk, you can use the following search query:
+
+```
+index=<your_index> sourcetype=<your_sourcetype> (EventCode=4688 OR EventCode=4689) NewProcessName=*wmic* CommandLine=*process*call*create*node* CommandLine=*cmd*Process*call*create*node* | table _time, host, user, NewProcessName, CommandLine
+```
+
+Make sure to replace `<your_index>` and `<your_sourcetype>` with the appropriate index and sourcetype values for your environment.
+
+This search query looks for events with EventCode 4688 (A new process has been created) and EventCode 4689 (A process has exited) which can indicate the execution of new processes. The `NewProcessName` field is checked for the presence of "wmic" and the `CommandLine` field is checked for the presence of specific strings that might be associated with T1056 activity.
+
+The search results will display the timestamp (`_time`), the host where the event occurred, the user associated with the event, the name of the new process (`NewProcessName`), and the command line used to execute the process (`CommandLine`).
+
+Keep in mind that this is a general approach, and you may need to customize the search query based on your specific environment and data sources. Additionally, T1056 refers to a specific technique in MITRE ATT&CK framework related to input capture, so you may need to adjust the search query further to align with the specific detection requirements for T1056.
+
+---------
+To detect suspicious PowerShell script execution via EventCode 4104 with WMI event queries for running processes or running services in Splunk, you can use the following search query:
+
+```
+index=<your_index> sourcetype=<your_sourcetype> EventCode=4104 CommandLine="*powershell*" (Query=*Win32_Process* OR Query=*Win32_Service*) | table _time, host, user, CommandLine, Query
+```
+
+Replace `<your_index>` and `<your_sourcetype>` with the appropriate index and sourcetype values for your environment.
+
+This search query filters for events with EventCode 4104, which typically corresponds to WMI queries. The `CommandLine` field is checked for the presence of "powershell", indicating PowerShell script execution. The `Query` field is checked for specific event queries related to Win32_Process (running processes) and Win32_Service (running services).
+
+The search results will include the timestamp (`_time`), the host where the event occurred, the user associated with the event, the command line used to execute PowerShell (`CommandLine`), and the specific WMI event query performed (`Query`).
+
+Keep in mind that this is a basic detection approach, and you may need to further refine the search query or add additional conditions to improve accuracy based on your specific environment and data sources.
+
+-----
+To detect the use of Win32 API functions that can be used to capture user keystrokes in PowerShell scripts in Splunk, you can use the following search query:
+
+```
+index=<your_index> sourcetype=<your_sourcetype> (EventCode=4104 OR EventCode=4688) (CommandLine=*Add-Type*Win32*User32* OR CommandLine=*Add-Type*Win32*Kernel32* OR CommandLine=*DllImport*User32* OR CommandLine=*DllImport*Kernel32*) CommandLine=*GetAsyncKeyState* | table _time, host, user, CommandLine
+```
+
+Replace `<your_index>` and `<your_sourcetype>` with the appropriate index and sourcetype values for your environment.
+
+This search query combines events with EventCode 4104 (WMI event queries) and EventCode 4688 (new process creation) to capture different scenarios where Win32 API functions may be used. The `CommandLine` field is checked for specific PowerShell commands and keywords (`Add-Type`, `DllImport`) followed by references to `Win32` libraries such as `User32` and `Kernel32`. Finally, the search filters for the presence of `GetAsyncKeyState`, an API function commonly used for capturing keystrokes.
+
+The search results will include the timestamp (`_time`), the host where the event occurred, the user associated with the event, and the command line that triggered the detection (`CommandLine`).
+
+Please note that this is a basic detection approach, and it may not capture all possible variations or obfuscated PowerShell scripts that use Win32 API functions for keystroke capture. Adjustments and fine-tuning may be required based on your specific environment and data sources.
+------
