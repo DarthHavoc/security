@@ -1,2 +1,17 @@
 sourcetype=WinEventLog:Security (EventCode=4688 OR EventCode=592) (New_Process_Name="*\\net.exe" OR New_Process_Name="*\\wmic.exe" OR New_Process_Name="*\\systeminfo.exe" OR New_Process_Name="*\\cmdkey.exe") | stats count by New_Process_Name
 \\query to leverage Windows event logs for detecting the gathering of victim host information and client configurations. - focus on Windows event logs, specifically the Security event log (WinEventLog:Security). We filter for event codes 4688 (Process Creation) and 592 (A New Process Created). These event codes indicate the creation of new processes on the system. We further refine the search by checking for specific process names (net.exe, wmic.exe, systeminfo.exe, cmdkey.exe) using the New_Process_Name field. The *\\ before each process name ensures we match any path where the process is executed. By running this search, you can identify instances where these processes were created based on the Windows event logs, which provides more detailed information about process execution.\\
+
+
+
+index=your_index (sourcetype=WinEventLog:Security OR sourcetype="XmlWinEventLog:Microsoft-Windows-PowerShell/Operational") (EventCode=4688 OR EventCode=4104) (New_Process_Name="*\\net.exe" OR New_Process_Name="*\\wmic.exe" OR New_Process_Name="*\\systeminfo.exe" OR New_Process_Name="*\\cmdkey.exe" OR New_Process_Name="*\\powershell.exe") | stats count by EventCode, New_Process_Name
+
+
+This search query combines Windows Security event logs (WinEventLog:Security) and PowerShell operational logs (XmlWinEventLog:Microsoft-Windows-PowerShell/Operational).
+
+We filter for event codes 4688 (Process Creation) and 4104 (PowerShell Script Block Logging) to capture process creation events and PowerShell script block logs.
+
+We further refine the search by checking for specific process names (net.exe, wmic.exe, systeminfo.exe, cmdkey.exe, powershell.exe) using the New_Process_Name field.
+
+The stats command is then used to count the occurrences of each event code and process name combination.
+
+By running this search, you can identify instances where the specified processes were created or PowerShell script blocks were logged, indicating potential activities related to gathering victim host information and client configurations.
