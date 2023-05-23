@@ -1,0 +1,1 @@
+index=your_index sourcetype=WinEventLog:Security (EventCode=4688 OR EventCode=592) (New_Process_Name="*\\net.exe" OR New_Process_Name="*\\wmic.exe" OR New_Process_Name="*\\systeminfo.exe" OR New_Process_Name="*\\cmdkey.exe") | stats count by New_Process_Name
