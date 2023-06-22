@@ -33,3 +33,25 @@ Here's a breakdown of the search query:
 - `stats count by host, action, service`: Provides a count of events grouped by the host, action, and service fields, indicating the number of successful logins to service providers using SAML SSO without corresponding ADFS and Domain Controller events.
 
 Make sure to replace `your_index` and adjust other fields and conditions as necessary to match your environment and log data structure.
+
+
+Apologies for the confusion. The previous query I provided was just a partial example. Here's the complete Splunk search query that incorporates all the necessary events for detecting Golden SAML authentications by correlating service provider login events with corresponding authentication events in ADFS and Domain Controllers:
+
+```plaintext
+index=your_index sourcetype=windows_security_log (EventCode=1202 OR EventCode=1200) AND EventID="Security-Auditing" AND EventData="The Federation Service validated a new credential"
+| join host [search index=your_index sourcetype=windows_security_log EventCode=4769 EventID="Security-Auditing"]
+| join host [search index=your_index sourcetype=service_provider_logs (service="AWS" AND (action="ConsoleLogin" OR action="AssumeRoleWithSAML")) OR (service="Azure AD" AND action="Sign-ins")]
+| stats count by host, action, service
+```
+
+Here's the breakdown of the complete query:
+
+- `index=your_index sourcetype=windows_security_log (EventCode=1202 OR EventCode=1200) AND EventID="Security-Auditing" AND EventData="The Federation Service validated a new credential"`: Searches for ADFS server Windows Security Event Log events with Event Code 1202 or 1200, Event ID "Security-Auditing", and EventData indicating a validated credential.
+
+- `join host [search index=your_index sourcetype=windows_security_log EventCode=4769 EventID="Security-Auditing"]`: Joins the ADFS server events with Domain Controller Windows Security Event Log events with Event Code 4769 and Event ID "Security-Auditing" based on the common field "host".
+
+- `join host [search index=your_index sourcetype=service_provider_logs (service="AWS" AND (action="ConsoleLogin" OR action="AssumeRoleWithSAML")) OR (service="Azure AD" AND action="Sign-ins")]`: Joins the previous events with the service provider logs based on the common field "host" and filters for the specific service provider logs and login actions.
+
+- `stats count by host, action, service`: Provides a count of events grouped by the host, action, and service fields, indicating the number of successful logins to service providers using SAML SSO without corresponding ADFS and Domain Controller events.
+
+Remember to replace `your_index` with the appropriate index name in your Splunk environment. You may also need to adjust other fields, conditions, and filter values based on your specific log data.
