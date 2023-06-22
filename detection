@@ -55,3 +55,49 @@ Here's the breakdown of the complete query:
 - `stats count by host, action, service`: Provides a count of events grouped by the host, action, and service fields, indicating the number of successful logins to service providers using SAML SSO without corresponding ADFS and Domain Controller events.
 
 Remember to replace `your_index` with the appropriate index name in your Splunk environment. You may also need to adjust other fields, conditions, and filter values based on your specific log data.
+
+
+Certainly! Here's a PowerShell script that you can use to simulate a successful login to a service provider using SAML SSO, which should trigger the detection in Splunk when you search for the corresponding events:
+
+```powershell
+# Simulate successful login to a service provider using SAML SSO
+$serviceProvider = "AWS"  # Specify the service provider (e.g., "AWS", "Azure AD")
+$action = "ConsoleLogin"  # Specify the login action (e.g., "ConsoleLogin", "AssumeRoleWithSAML", "Sign-ins")
+
+# Generate event logs for ADFS server
+$event1202 = New-Object System.Diagnostics.EventLog("Security")
+$event1202.MachineName = "."  # Replace with the ADFS server hostname if necessary
+$event1202.Source = "AD FS"
+$event1202.WriteEntry("The Federation Service validated a new credential", 1202)
+
+$event1200 = New-Object System.Diagnostics.EventLog("Security")
+$event1200.MachineName = "."  # Replace with the ADFS server hostname if necessary
+$event1200.Source = "AD FS"
+$event1200.WriteEntry("The Federation Service issued a valid token", 1200)
+
+# Generate event logs for Domain Controller
+$event4769 = New-Object System.Diagnostics.EventLog("Security")
+$event4769.MachineName = "."  # Replace with the Domain Controller hostname if necessary
+$event4769.Source = "Microsoft-Windows-Security-Auditing"
+$event4769.WriteEntry("A Kerberos service ticket was requested", 4769)
+
+# Generate logs for the service provider
+$serviceProviderLog = "C:\Path\To\ServiceProvider.log"  # Replace with the actual path to the service provider log file
+$logMessage = "Successful $action on $serviceProvider"  # Customize the log message as needed
+
+Add-Content -Path $serviceProviderLog -Value $logMessage
+
+# Output success message
+Write-Host "Simulated successful login to $serviceProvider using $action. Logs generated."
+```
+
+In this script, make sure to replace the following placeholders:
+
+- `$serviceProvider`: Replace with the actual service provider name, such as "AWS" or "Azure AD".
+- `$action`: Replace with the appropriate login action specific to your service provider, such as "ConsoleLogin", "AssumeRoleWithSAML", or "Sign-ins".
+- `$event1202.MachineName`: If your ADFS server is not running on the local machine, replace `"."` with the hostname or IP address of the ADFS server.
+- `$event4769.MachineName`: If your Domain Controller is not running on the local machine, replace `"."` with the hostname or IP address of the Domain Controller.
+- `$serviceProviderLog`: Replace with the actual path to the service provider log file where you want to generate the simulated log entry.
+- `$logMessage`: Customize the log message according to your service provider log format and requirements.
+
+When you run this script, it will generate the necessary event logs and log entries that should trigger the detection in Splunk when you search for the corresponding events.
