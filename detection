@@ -2,3 +2,34 @@ index=your_index sourcetype=your_sourcetype "certutil.exe"
     (certutil_command="-export" OR certutil_command="-importpfx" OR certutil_command="-importcert" OR certutil_command="-sign")
     (certutil_argument=* OR certutil_argument="-f" OR certutil_argument="-user" OR certutil_argument="-p" OR certutil_argument="-pin")
     (certutil_argument=*token* OR certutil_argument=*adfs*)
+
+
+To detect Golden SAML authentications by correlating service provider login events with corresponding authentication events in ADFS and Domain Controllers, you can use the following Splunk search query:
+
+```plaintext
+index=your_index sourcetype=windows_security_log
+    (EventCode=1202 OR EventCode=1200) AND EventID="Security-Auditing" AND EventData="The Federation Service validated a new credential"
+| table EventCode, EventID, host, _time
+| join host [search index=your_index sourcetype=windows_security_log EventCode=4769 EventID="Security-Auditing" 
+    | table host, EventCode, EventID, _time]
+| join host [search index=your_index sourcetype=service_provider_logs 
+    | search (service="AWS" AND (action="ConsoleLogin" OR action="AssumeRoleWithSAML")) OR (service="Azure AD" AND action="Sign-ins")
+    | table host, action, service, _time]
+| stats count by host, action, service
+```
+
+Here's a breakdown of the search query:
+
+- `index=your_index sourcetype=windows_security_log`: Replace `your_index` with the appropriate value for your Splunk environment and ensure the sourcetype is set correctly for the Windows Security Event Log.
+
+- `(EventCode=1202 OR EventCode=1200) AND EventID="Security-Auditing" AND EventData="The Federation Service validated a new credential"`: Searches for ADFS server Windows Security Event Log events with Event Code 1202 or 1200 and Event ID "Security-Auditing" containing the specified EventData. Adjust the values or the query structure if your log data differs.
+
+- `table EventCode, EventID, host, _time`: Selects specific fields to include in the result table for the ADFS server events.
+
+- `join host [search index=your_index sourcetype=windows_security_log EventCode=4769 EventID="Security-Auditing" | table host, EventCode, EventID, _time]`: Joins the ADFS server events with Domain Controller Windows Security Event Log events with Event Code 4769 and Event ID "Security-Auditing" based on the common field "host". Modify the index and sourcetype as needed.
+
+- `join host [search index=your_index sourcetype=service_provider_logs | search (service="AWS" AND (action="ConsoleLogin" OR action="AssumeRoleWithSAML")) OR (service="Azure AD" AND action="Sign-ins") | table host, action, service, _time]`: Joins the previous events with the service provider logs based on the common field "host". Adjust the conditions and fields based on your specific service provider logs.
+
+- `stats count by host, action, service`: Provides a count of events grouped by the host, action, and service fields, indicating the number of successful logins to service providers using SAML SSO without corresponding ADFS and Domain Controller events.
+
+Make sure to replace `your_index` and adjust other fields and conditions as necessary to match your environment and log data structure.
