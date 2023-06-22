@@ -101,3 +101,27 @@ In this script, make sure to replace the following placeholders:
 - `$logMessage`: Customize the log message according to your service provider log format and requirements.
 
 When you run this script, it will generate the necessary event logs and log entries that should trigger the detection in Splunk when you search for the corresponding events.
+
+
+To detect certificate export events in ADFS as part of the second detection method, you can use the following Splunk search query:
+
+```plaintext
+index=your_index sourcetype=windows_eventlog EventCode=1007 SourceName="Microsoft-Windows-CertificateServicesClient-Lifecycle-System"
+OR (index=your_index sourcetype="wineventlog:security" (EventCode=4103 OR EventCode=4104) (CommandLine="*Export-PfxCertificate*" OR CommandLine="*certutil* -exportPFX"))
+OR (index=your_index sourcetype="wineventlog:security" EventCode=4688 CommandLine="*certutil* -exportPFX")
+OR (index=your_index sourcetype=sysmon EventID=18 TargetPipeName="\\microsoft##wid\tsql\query" NOT Image="*trusted process 1*" NOT Image="*trusted process 2*" ...)
+```
+
+Here's a breakdown of the search query:
+
+- `index=your_index`: Replace `your_index` with the appropriate value for your Splunk environment. This ensures that you're searching within the correct index.
+
+- `sourcetype=windows_eventlog EventCode=1007 SourceName="Microsoft-Windows-CertificateServicesClient-Lifecycle-System"`: Searches for Event Code 1007 in the Microsoft-Windows-CertificateServicesClient-Lifecycle-System source, indicating certificate export events in the ADFS server.
+
+- `(index=your_index sourcetype="wineventlog:security" (EventCode=4103 OR EventCode=4104) (CommandLine="*Export-PfxCertificate*" OR CommandLine="*certutil* -exportPFX"))`: Searches for Event Codes 4103 or 4104 in the security event logs, indicating PowerShell script block logs containing 'Export-PfxCertificate' or 'certutil -exportPFX' commands.
+
+- `(index=your_index sourcetype="wineventlog:security" EventCode=4688 CommandLine="*certutil* -exportPFX")`: Searches for Event Code 4688 in the security event logs, indicating command-line auditing events with 'certutil -exportPFX' command.
+
+- `(index=your_index sourcetype=sysmon EventID=18 TargetPipeName="\\microsoft##wid\tsql\query" NOT Image="*trusted process 1*" NOT Image="*trusted process 2*" ...)`: Searches for Sysmon Event ID 18 with a specific target pipe name and excludes known trusted processes. This helps identify certificate extraction with ADFSdump using the specified pipe name.
+
+Ensure that you replace `your_index` with the appropriate index name in your Splunk environment. Additionally, customize the search query based on your specific trusted process names and adjust the conditions to match your environment and log data.
