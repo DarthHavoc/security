@@ -3,6 +3,7 @@ index=your_index sourcetype=your_sourcetype "certutil.exe"
     (certutil_argument=* OR certutil_argument="-f" OR certutil_argument="-user" OR certutil_argument="-p" OR certutil_argument="-pin")
     (certutil_argument=*token* OR certutil_argument=*adfs*)
 
+___________________________________________________________________________________________________________________________________________
 
 To detect Golden SAML authentications by correlating service provider login events with corresponding authentication events in ADFS and Domain Controllers, you can use the following Splunk search query:
 
@@ -33,7 +34,7 @@ Here's a breakdown of the search query:
 - `stats count by host, action, service`: Provides a count of events grouped by the host, action, and service fields, indicating the number of successful logins to service providers using SAML SSO without corresponding ADFS and Domain Controller events.
 
 Make sure to replace `your_index` and adjust other fields and conditions as necessary to match your environment and log data structure.
-
+___________________________________________________________________________________________________________________________________________
 
 Apologies for the confusion. The previous query I provided was just a partial example. Here's the complete Splunk search query that incorporates all the necessary events for detecting Golden SAML authentications by correlating service provider login events with corresponding authentication events in ADFS and Domain Controllers:
 
@@ -55,7 +56,7 @@ Here's the breakdown of the complete query:
 - `stats count by host, action, service`: Provides a count of events grouped by the host, action, and service fields, indicating the number of successful logins to service providers using SAML SSO without corresponding ADFS and Domain Controller events.
 
 Remember to replace `your_index` with the appropriate index name in your Splunk environment. You may also need to adjust other fields, conditions, and filter values based on your specific log data.
-
+___________________________________________________________________________________________________________________________________________
 
 Certainly! Here's a PowerShell script that you can use to simulate a successful login to a service provider using SAML SSO, which should trigger the detection in Splunk when you search for the corresponding events:
 
@@ -103,6 +104,18 @@ In this script, make sure to replace the following placeholders:
 When you run this script, it will generate the necessary event logs and log entries that should trigger the detection in Splunk when you search for the corresponding events.
 
 
+
+index=azure sourcetype=WinEventLog:Security (EventCode=1202 OR EventCode=1200) AND SourceName="AD FS Auditing" AND Message="*The Federation Service validated a new credential*"
+| join host [search index=* sourcetype="WinEventLog:Security" EventCode=4769 SourceName="Microsoft Windows security auditing*"]
+| join host [search (index=* sourcetype=aws:cloudtrail AND (eventName="ConsoleLogin" OR eventName="AssumeRoleWithSAML")) OR (index=azure sourcetype="azure:signinlogs" "body.operationName"="Sign-in activity")]
+| rename  "body.operationName" as operationName
+| stats count by host, sourcetype, eventName, operationName
+
+
+
+
+
+___________________________________________________________________________________________________________________________________________
 To detect certificate export events in ADFS as part of the second detection method, you can use the following Splunk search query:
 
 ```plaintext
