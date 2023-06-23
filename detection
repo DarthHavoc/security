@@ -58,50 +58,7 @@ Here's the breakdown of the complete query:
 Remember to replace `your_index` with the appropriate index name in your Splunk environment. You may also need to adjust other fields, conditions, and filter values based on your specific log data.
 ___________________________________________________________________________________________________________________________________________
 
-Certainly! Here's a PowerShell script that you can use to simulate a successful login to a service provider using SAML SSO, which should trigger the detection in Splunk when you search for the corresponding events:
-
-```powershell
-# Simulate successful login to a service provider using SAML SSO
-$serviceProvider = "AWS"  # Specify the service provider (e.g., "AWS", "Azure AD")
-$action = "ConsoleLogin"  # Specify the login action (e.g., "ConsoleLogin", "AssumeRoleWithSAML", "Sign-ins")
-
-# Generate event logs for ADFS server
-$event1202 = New-Object System.Diagnostics.EventLog("Security")
-$event1202.MachineName = "."  # Replace with the ADFS server hostname if necessary
-$event1202.Source = "AD FS"
-$event1202.WriteEntry("The Federation Service validated a new credential", 1202)
-
-$event1200 = New-Object System.Diagnostics.EventLog("Security")
-$event1200.MachineName = "."  # Replace with the ADFS server hostname if necessary
-$event1200.Source = "AD FS"
-$event1200.WriteEntry("The Federation Service issued a valid token", 1200)
-
-# Generate event logs for Domain Controller
-$event4769 = New-Object System.Diagnostics.EventLog("Security")
-$event4769.MachineName = "."  # Replace with the Domain Controller hostname if necessary
-$event4769.Source = "Microsoft-Windows-Security-Auditing"
-$event4769.WriteEntry("A Kerberos service ticket was requested", 4769)
-
-# Generate logs for the service provider
-$serviceProviderLog = "C:\Path\To\ServiceProvider.log"  # Replace with the actual path to the service provider log file
-$logMessage = "Successful $action on $serviceProvider"  # Customize the log message as needed
-
-Add-Content -Path $serviceProviderLog -Value $logMessage
-
-# Output success message
-Write-Host "Simulated successful login to $serviceProvider using $action. Logs generated."
-```
-
-In this script, make sure to replace the following placeholders:
-
-- `$serviceProvider`: Replace with the actual service provider name, such as "AWS" or "Azure AD".
-- `$action`: Replace with the appropriate login action specific to your service provider, such as "ConsoleLogin", "AssumeRoleWithSAML", or "Sign-ins".
-- `$event1202.MachineName`: If your ADFS server is not running on the local machine, replace `"."` with the hostname or IP address of the ADFS server.
-- `$event4769.MachineName`: If your Domain Controller is not running on the local machine, replace `"."` with the hostname or IP address of the Domain Controller.
-- `$serviceProviderLog`: Replace with the actual path to the service provider log file where you want to generate the simulated log entry.
-- `$logMessage`: Customize the log message according to your service provider log format and requirements.
-
-When you run this script, it will generate the necessary event logs and log entries that should trigger the detection in Splunk when you search for the corresponding events.
+My script
 
 
 
@@ -112,7 +69,59 @@ index=azure sourcetype=WinEventLog:Security (EventCode=1202 OR EventCode=1200) A
 | stats count by host, sourcetype, eventName, operationName
 
 
+To test: 
 
+
+Apologies for the confusion. I understand now that you need PowerShell scripts to generate events in your environment to validate that your Splunk query is working correctly.
+
+Unfortunately, as an AI language model, I cannot provide you with specific PowerShell scripts tailored to your environment and log sources. However, I can provide you with a general approach and some examples of PowerShell code snippets that you can use as a starting point to generate events.
+
+1. Simulating ADFS Events:
+```powershell
+# Simulate ADFS validation event
+$eventData = @{
+    EventCode = 1202
+    SourceName = "AD FS Auditing"
+    Message = "The Federation Service validated a new credential"
+}
+Write-EventLog -LogName Security -EventId $eventData.EventCode -Source $eventData.SourceName -Message $eventData.Message
+
+# Simulate ADFS issuance event
+$eventData = @{
+    EventCode = 1200
+    SourceName = "AD FS Auditing"
+    Message = "The Federation Service issued a valid token"
+}
+Write-EventLog -LogName Security -EventId $eventData.EventCode -Source $eventData.SourceName -Message $eventData.Message
+```
+
+2. Simulating Domain Controller Events:
+```powershell
+# Simulate Kerberos service ticket request event on Domain Controller
+$eventData = @{
+    EventCode = 4769
+    SourceName = "Microsoft Windows security auditing"
+    Message = "A Kerberos service ticket was requested"
+}
+Write-EventLog -LogName Security -EventId $eventData.EventCode -Source $eventData.SourceName -Message $eventData.Message
+```
+
+3. Simulating Service Provider Events:
+```powershell
+# Simulate service provider login event
+$eventData = @{
+    EventCode = 1234
+    SourceName = "MyServiceProvider"
+    Message = "Successful ConsoleLogin on AWS"
+}
+Write-EventLog -LogName Security -EventId $eventData.EventCode -Source $eventData.SourceName -Message $eventData.Message
+```
+
+In the above examples, replace `"AD FS Auditing"`, `"Microsoft Windows security auditing"`, and `"MyServiceProvider"` with the appropriate source names used in your environment. You can also customize the event codes, messages, and log names based on your requirements.
+
+By running these PowerShell scripts, you will generate events that align with your Splunk query. Ensure that your Splunk environment is properly configured to collect and index the logs generated by these scripts. You can then perform the search using your modified query to validate the detection.
+
+Please note that the provided examples are general and may require customization to match the specific log format and content in your environment.
 
 
 ___________________________________________________________________________________________________________________________________________
