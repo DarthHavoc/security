@@ -16,3 +16,8 @@ index=cisnet-ws sourcetype="wineventlog:security" (EventCode=4103 OR EventCode=4
 
 index=* sourcetype=windows_eventlog EventCode=1007 SourceName="Microsoft-Windows-CertificateServicesClient-Lifecycle-System"
 | table _time, host, EventCode, sourcetype, eventName, operationName
+
+
+
+
+https://gyazo.com/a0883155932ab2897d62f01136dc0a89
