@@ -1,0 +1,18 @@
+index=azure sourcetype=WinEventLog:Security (EventCode=1202 OR EventCode=1200) AND SourceName="AD FS Auditing" AND Message="*The Federation Service validated a new credential*"
+| join host [search index=* sourcetype="WinEventLog:Security" EventCode=4769 SourceName="Microsoft Windows security auditing*"]
+| join host [search (index=aws* sourcetype=aws:cloudtrail AND (eventName="ConsoleLogin" OR eventName="AssumeRoleWithSAML")) OR (index=azure sourcetype="azure:signinlogs" "body.operationName"="Sign-in activity")]
+| rename  "body.operationName" as operationName
+| table _time, host, EventCode, sourcetype, eventName, operationName
+
+
+
+index=cisnet-ws sourcetype=WinEventLog:Security EventCode=4688 CommandLine="*certutil* -exportPFX"
+| table _time, host, EventCode, sourcetype, eventName, operationName
+
+
+index=cisnet-ws sourcetype="wineventlog:security" (EventCode=4103 OR EventCode=4104) (CommandLine="*Export-PfxCertificate*" OR CommandLine="*certutil* -exportPFX")
+| table _time, host, EventCode, sourcetype, eventName, operationName
+
+
+index=* sourcetype=windows_eventlog EventCode=1007 SourceName="Microsoft-Windows-CertificateServicesClient-Lifecycle-System"
+| table _time, host, EventCode, sourcetype, eventName, operationName
