@@ -39,3 +39,4 @@
 
     Execution (T1059)
         Command-Line Interface (T1059.003)
+<img width="2548" alt="image" src="https://github.com/DarthHavoc/security/assets/101420646/5ac7fe61-6b40-474a-98d5-b6fe88b18768">
