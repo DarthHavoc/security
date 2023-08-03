@@ -24,3 +24,68 @@ index=<your_sysmon_index> sourcetype="xmlwineventlog:microsoft-windows-sysmon/op
 | rex field=Message "<Url>(?<url>.*?)<\/Url>"
 | table _time, ComputerName, TargetFilename, url
 | dedup url
+
+
+Certainly, I can help you with that! To detect links originating from attachments in Sysmon logs using Splunk, you'll need to create a search that identifies events indicating the opening of attachments and then extracts URLs from those attachments. Below is an example of a Splunk search query that accomplishes this:
+
+splunk
+
+index=<your_sysmon_index> sourcetype="xmlwineventlog:microsoft-windows-sysmon/operational" EventID=8 TargetFilename=*.doc* OR TargetFilename=*.xls* OR TargetFilename=*.pdf* OR TargetFilename=*.zip*
+| rex field=Message "<Url>(?<url>.*?)<\/Url>"
+| table _time, ComputerName, TargetFilename, url
+| dedup url
+
+Let's break down the components of this search:
+
+    index=<your_sysmon_index>: Replace <your_sysmon_index> with the actual index name where your Sysmon logs are stored.
+
+    sourcetype="xmlwineventlog:microsoft-windows-sysmon/operational": This specifies the sourcetype for Sysmon logs.
+
+    EventID=8: We're focusing on Event ID 8, which represents "CreateRemoteThread" events that occur when a process is created in a remote thread.
+
+    TargetFilename=*.doc* OR TargetFilename=*.xls* OR TargetFilename=*.pdf* OR TargetFilename=*.zip*: We're filtering for events where the TargetFilename indicates common attachment file types like Word documents, Excel spreadsheets, PDFs, and ZIP archives. You can customize this list based on the types of attachments you want to analyze.
+
+    rex field=Message "<Url>(?<url>.*?)<\/Url>": This regular expression extraction captures URLs enclosed within <Url></Url> tags in the event's message field.
+
+    table _time, ComputerName, TargetFilename, url: This command specifies the fields you want to display in the search results. Adjust this list according to your needs.
+
+    dedup url: This removes duplicate URLs from the search results.
+
+Make sure to replace <your_sysmon_index> with your actual Sysmon index name, and you can also customize the attachment file types in the TargetFilename filter as needed.
+
+Remember that the actual format and content of Sysmon logs might vary based on your environment and configurations. Be sure to adapt the search according to your specific setup and log structure.
+User
+what limitations does this search have when looking for html smuggling, is there too much noise
+ChatGPT
+
+The search I provided focuses on extracting URLs from Sysmon events related to the opening of attachments. While it can be useful for detecting URLs within attachments, there are limitations and potential noise associated with this approach, especially when looking for techniques like HTML smuggling. Here are some limitations and considerations:
+
+    Limited to Known Attachment Types: The search is based on filtering by specific attachment file types (e.g., .doc, .xls, .pdf, .zip). If attackers use different or unconventional file types to carry out HTML smuggling, this search might not capture those cases.
+
+    Reliance on Correct Tagging: The search assumes that URLs are enclosed within <Url></Url> tags. If attackers obfuscate URLs or use different methods to embed them within attachments, the search might not extract them accurately.
+
+    Limited Context: The search does not provide context about the URLs' relationship with the attachment. It might not differentiate between legitimate links and malicious ones hidden in the attachment.
+
+    Noise from Legitimate Activity: Attachments often contain legitimate URLs for various purposes (e.g., hyperlinks in documents). This can lead to a significant amount of noise in the search results.
+
+    Detection of HTML Smuggling Techniques: HTML smuggling often involves encoding/decoding URLs or leveraging JavaScript to extract and execute content. This search doesn't directly account for these techniques.
+
+    Bypassing URL Extraction: Attackers might use techniques that avoid direct URL extraction, making it harder for this search to detect them.
+
+To address these limitations and improve the search for HTML smuggling detection, you might consider the following approaches:
+
+    Behavioral Analysis: Instead of relying solely on attachment types, analyze behavioral patterns of processes and their interactions with URLs. Look for processes extracting content, decoding URLs, or engaging in suspicious network activity.
+
+    Content Inspection: Use more advanced methods to analyze the content of attachments, like sandboxing or detonation chambers, to detect hidden malicious URLs.
+
+    User and Entity Behavior Analytics (UEBA): Incorporate UEBA solutions that can profile normal user behavior and identify anomalies, including unusual attachment-to-URL behavior.
+
+    Threat Intelligence Integration: Integrate threat intelligence feeds to cross-reference URLs in attachments with known malicious domains.
+
+    Advanced Regular Expressions: Develop more sophisticated regular expressions to capture different URL formats and variations.
+
+    Machine Learning and Anomaly Detection: Implement machine learning algorithms to detect patterns associated with HTML smuggling techniques.
+
+    Manual Analysis: Combine automated searches with manual analysis to differentiate between legitimate and suspicious activity.
+
+Remember that adversaries continually evolve their tactics, techniques, and procedures, so it's important to stay updated with the latest threat intelligence and adapt your detection strategies accordingly.
