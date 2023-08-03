@@ -20,3 +20,7 @@ index=* sourcetype=windows_eventlog EventCode=1007 SourceName="Microsoft-Windows
 
 
 
+index=<your_sysmon_index> sourcetype="xmlwineventlog:microsoft-windows-sysmon/operational" EventID=8 TargetFilename=*.doc* OR TargetFilename=*.xls* OR TargetFilename=*.pdf* OR TargetFilename=*.zip*
+| rex field=Message "<Url>(?<url>.*?)<\/Url>"
+| table _time, ComputerName, TargetFilename, url
+| dedup url
