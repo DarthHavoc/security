@@ -1,0 +1,5 @@
+index=* sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" 
+    EventCode=1 
+    net.exe OR net1.exe
+``` 5min time span ``` | bucket _time span=5m as min_time
+``` Organize by User in the time span | eventstats values(DestinationIp) as DestinationIps, count by User, min_time```
