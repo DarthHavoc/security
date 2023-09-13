@@ -24,3 +24,27 @@ for ($i = 1; $i -le 20; $i++) {  # You can adjust the loop count as needed
 
 Write-Host "Simulated process termination events created."
 
+
+
+# Define the process name
+$processName = "notepad.exe"
+
+# Define the number of iterations (adjust as needed)
+$iterations = 20
+
+# Loop to open and close Notepad
+for ($i = 1; $i -le $iterations; $i++) {
+    # Start Notepad
+    Start-Process -FilePath $processName
+    
+    # Sleep for a few seconds (adjust as needed)
+    Start-Sleep -Seconds 5
+    
+    # Close Notepad
+    Get-Process -Name $processName | ForEach-Object { $_.CloseMainWindow() }
+    
+    # Sleep again before the next iteration (adjust as needed)
+    Start-Sleep -Seconds 5
+}
+
+Write-Host "Simulated process creation and termination completed."
