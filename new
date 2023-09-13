@@ -74,3 +74,11 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
     185      11     1940      11900       0.06  68424   0 notepad
     185      11     1924      11856       0.03  70588   0 notepad
     185      11     1940      11876       0.09  79244   0 notepad
+# Get all processes named "notepad"
+$notepadProcesses = Get-Process | Where-Object { $_.ProcessName -eq "notepad" }
+
+# Loop through the processes and stop them
+foreach ($process in $notepadProcesses) {
+    Stop-Process -Id $process.Id -Force
+    Write-Host "Stopped Notepad process with ID $($process.Id)"
+}
