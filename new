@@ -1,7 +1,26 @@
-index=* sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" 
-    EventCode=1 
-    net.exe OR net1.exe
-``` 1min time span ``` | bucket _time span=1m
-| eval time=strftime(min_time,"%m/%d/%y %H:%M:%S")
-| stats count by ComputerName, _time, host, Image, CommandLine
-| sort _time
+$eventCode = 5
+$hostName = "YourComputerName"  # Replace with your target computer's hostname
+$processName = "MaliciousProcess.exe"  # Replace with the name of the process you want to simulate
+
+# Generate multiple process termination events in a loop
+for ($i = 1; $i -le 20; $i++) {  # You can adjust the loop count as needed
+    $eventId = Get-Random -Minimum 10000 -Maximum 99999  # Generate a random Event ID
+    
+    # Create a time stamp for the event (adjust as needed)
+    $eventTime = (Get-Date).AddSeconds(-$i * 5).ToString("yyyy-MM-ddTHH:mm:ss")
+
+    # Build the event log entry
+    $eventLogEntry = @{
+        TimeCreated = $eventTime
+        Id = $eventId
+        ProviderName = "Microsoft-Windows-Sysmon"
+        Message = "Process terminated: $($processName) (Process ID: $($i * 1000))"
+        MachineName = $hostName
+    }
+
+    # Create the event log entry
+    Write-EventLog -LogName "Microsoft-Windows-Sysmon/Operational" -Source "Microsoft-Windows-Sysmon" -EntryType Information -EventId $eventCode -Message $eventLogEntry['Message'] -ComputerName $hostName
+}
+
+Write-Host "Simulated process termination events created."
+
