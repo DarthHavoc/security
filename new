@@ -82,3 +82,30 @@ foreach ($process in $notepadProcesses) {
     Stop-Process -Id $process.Id -Force
     Write-Host "Stopped Notepad process with ID $($process.Id)"
 }
+
+
+
+# Define a list of applications to open and close
+$applications = @("notepad.exe", "calc.exe", "explorer.exe")
+
+# Define the number of iterations for each application (adjust as needed)
+$iterationsPerApp = 5
+
+# Loop through each application
+foreach ($app in $applications) {
+    # Open the application multiple times
+    for ($i = 1; $i -le $iterationsPerApp; $i++) {
+        Start-Process $app
+        Write-Host "Opened $app (Iteration $i)"
+        
+        # Sleep for a few seconds (adjust as needed)
+        Start-Sleep -Seconds 5
+        
+        # Close the application
+        Get-Process -Name $app | ForEach-Object { $_.CloseMainWindow() }
+        Write-Host "Closed $app (Iteration $i)"
+        
+        # Sleep again before the next iteration (adjust as needed)
+        Start-Sleep -Seconds 5
+    }
+}
