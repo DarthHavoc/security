@@ -27,7 +27,7 @@ Write-Host "Simulated process termination events created."
 
 
 # Define the process name
-$processName = "notepad.exe"
+$processName = "notepad"
 
 # Define the number of iterations (adjust as needed)
 $iterations = 20
@@ -35,16 +35,42 @@ $iterations = 20
 # Loop to open and close Notepad
 for ($i = 1; $i -le $iterations; $i++) {
     # Start Notepad
-    Start-Process -FilePath $processName
+    Start-Process $processName
     
     # Sleep for a few seconds (adjust as needed)
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 1
     
     # Close Notepad
     Get-Process -Name $processName | ForEach-Object { $_.CloseMainWindow() }
     
     # Sleep again before the next iteration (adjust as needed)
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 1
 }
 
 Write-Host "Simulated process creation and termination completed."
+
+for ($i = 1; $i -le $iterations; $i++) {
+    Stop-Process -Id 
+185      11     1924      11860       0.06   7848   0 notepad
+    185      11     1924      11860       0.05   8320   0 notepad
+    185      11     1944      11884       0.11  11556   0 notepad
+    185      11     1936      11884       0.11  13748   0 notepad
+    185      11     2028      11900       0.06  14116   0 notepad
+    185      11     2084      11932       0.08  18116   0 notepad
+    185      11     1944      11876       0.06  26676   0 notepad
+    185      11     1936      11876       0.09  31684   0 notepad
+    185      11     1920      11856       0.05  32844   0 notepad
+    185      11     1952      11880       0.13  33288   0 notepad
+    185      11     1944      11876       0.09  48144   0 notepad
+    185      11     1944      11872       0.13  51336   0 notepad
+    185      11     1944      11876       0.05  56128   0 notepad
+    185      11     1948      11880       0.13  57388   0 notepad
+    185      11     1936      11876       0.08  58108   0 notepad
+    185      11     2032      11916       0.06  59996   0 notepad
+    185      11     1940      11864       0.13  61840   0 notepad
+    185      11     1940      11888       0.08  63284   0 notepad
+    185      11     1932      11868       0.13  65092   0 notepad
+    185      11     1940      11864       0.08  65892   0 notepad
+    185      11     1940      11900       0.06  68424   0 notepad
+    185      11     1924      11856       0.03  70588   0 notepad
+    185      11     1940      11876       0.09  79244   0 notepad
