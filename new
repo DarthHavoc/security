@@ -109,3 +109,33 @@ foreach ($app in $applications) {
         Start-Sleep -Seconds 5
     }
 }
+
+# Define a list of application file paths to open
+$applicationPaths = @("C:\Windows\System32\notepad.exe", "C:\Windows\System32\calc.exe", "C:\Windows\explorer.exe")
+
+# Define the list of process names to close
+$processNames = @("notepad.exe", "calc.exe", "explorer.exe")
+
+# Define the number of iterations for each application (adjust as needed)
+$iterationsPerApp = 5
+
+# Loop through each application
+foreach ($appPath in $applicationPaths) {
+    $appName = [System.IO.Path]::GetFileName($appPath)  # Extract the process name from the full path
+    
+    # Open the application multiple times
+    for ($i = 1; $i -le $iterationsPerApp; $i++) {
+        Start-Process $appPath
+        Write-Host "Opened $appName (Iteration $i)"
+        
+        # Sleep for a few seconds (adjust as needed)
+        Start-Sleep -Seconds 5
+        
+        # Close the application using just the process name
+        Get-Process -Name $appName | ForEach-Object { $_.CloseMainWindow() }
+        Write-Host "Closed $appName (Iteration $i)"
+        
+        # Sleep again before the next iteration (adjust as needed)
+        Start-Sleep -Seconds 5
+    }
+}
