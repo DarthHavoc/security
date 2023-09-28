@@ -21,31 +21,17 @@ Make sure to replace `<your_index>` and `<your_sourcetype>` with appropriate val
 
 
 
-To detect the activity associated with the four atomic tests you've provided, you can create a Splunk search query that looks for relevant commands and activities in your log data. Here's a search query that should help you detect these activities:
+I understand that you want to detect the activity within the tests rather than just flagging the tests themselves. In this case, you can modify the Splunk search query to focus on the activity associated with each test. Here's a search query that detects the specific activities within the atomic tests:
 
 ```spl
 index=<your_index> sourcetype=<your_sourcetype>
-| search (command="sudo cat /etc/shadow > * OR cat *") OR
-  (command="cat /etc/passwd > * OR cat *") OR
+| search (command="sudo cat /etc/shadow > *") OR
+  (command="cat /etc/passwd > *") OR
   (command="echo -e \"e /etc/passwd\\n,p\\ne /etc/shadow\\n,p\\n\" | ed > *") OR
-  (command="function testcat(){ echo \"$(< $1)\"; } testcat /etc/passwd > * OR testcat /etc/shadow > *")
-| eval test_type=case(
-    match(command, "sudo cat /etc/shadow > *|cat *"), "Atomic Test #1 - Access /etc/shadow (Local)",
-    match(command, "cat /etc/passwd > *|cat *"), "Atomic Test #2 - Access /etc/passwd (Local)",
-    match(command, "echo -e \"e /etc/passwd\\n,p\\ne /etc/shadow\\n,p\\n\" | ed > *"), "Atomic Test #3 - Access /etc/{shadow,passwd} with a standard bin that's not cat",
-    match(command, "function testcat(){ echo \"$(< $1)\"; } testcat /etc/passwd > *|testcat /etc/shadow > *"), "Atomic Test #4 - Access /etc/{shadow,passwd} with shell builtins"
-)
-| table _time, user, host, command, test_type
+  (command="function testcat(){ echo \"$(< $1)\"; } testcat /etc/passwd > *|testcat /etc/shadow > *")
+| table _time, user, host, command
 ```
 
-Here's a breakdown of this Splunk search query:
+This modified query specifically looks for the activities within each test scenario, such as the execution of commands like `sudo cat /etc/shadow`, `cat /etc/passwd`, `echo -e ... | ed`, and the `testcat` function calls. It then displays relevant fields like the timestamp (`_time`), user, host, and the executed command.
 
-1. Replace `<your_index>` and `<your_sourcetype>` with the appropriate values for your Splunk setup.
-
-2. The `search` command filters events based on specific command patterns that match the atomic tests you've described. It looks for commands that are indicative of each test scenario.
-
-3. The `eval` command assigns a `test_type` field to each event, indicating which atomic test it matches based on the command pattern.
-
-4. Finally, the `table` command is used to display the relevant fields in the search results, including the timestamp (`_time`), user, host, command, and `test_type` to identify which atomic test was detected.
-
-This query should help you detect the specified activities associated with the four atomic tests. Make sure to adjust the index and sourcetype to match your environment, and test it in your lab or test environment before implementing it in production.
+This approach will help you focus on detecting the activities associated with the tests rather than just identifying the tests themselves. Again, ensure that you adjust the index and sourcetype to match your environment, and test the query in a controlled environment before using it in a production setting.
