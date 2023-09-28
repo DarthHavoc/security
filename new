@@ -1,174 +1,51 @@
-$eventCode = 5
-$hostName = "YourComputerName"  # Replace with your target computer's hostname
-$processName = "MaliciousProcess.exe"  # Replace with the name of the process you want to simulate
+To create a Splunk search query to detect activity related to T1003.008 - OS Credential Dumping of /etc/passwd and /etc/shadow, you can use the following search query. This query will help you identify any execution of the `unshadow` utility on your Linux systems:
 
-# Generate multiple process termination events in a loop
-for ($i = 1; $i -le 20; $i++) {  # You can adjust the loop count as needed
-    $eventId = Get-Random -Minimum 10000 -Maximum 99999  # Generate a random Event ID
-    
-    # Create a time stamp for the event (adjust as needed)
-    $eventTime = (Get-Date).AddSeconds(-$i * 5).ToString("yyyy-MM-ddTHH:mm:ss")
+```spl
+index=<your_index> sourcetype=<your_sourcetype> (command="/usr/bin/unshadow /etc/passwd /etc/shadow > /tmp/crack.password.db" OR cmdline="*unshadow*") NOT (user=root)
+```
 
-    # Build the event log entry
-    $eventLogEntry = @{
-        TimeCreated = $eventTime
-        Id = $eventId
-        ProviderName = "Microsoft-Windows-Sysmon"
-        Message = "Process terminated: $($processName) (Process ID: $($i * 1000))"
-        MachineName = $hostName
-    }
+Here's an explanation of the components in this search query:
 
-    # Create the event log entry
-    Write-EventLog -LogName "Microsoft-Windows-Sysmon/Operational" -Source "Microsoft-Windows-Sysmon" -EntryType Information -EventId $eventCode -Message $eventLogEntry['Message'] -ComputerName $hostName
-}
+1. `index=<your_index>`: Replace `<your_index>` with the name of the index where your relevant log data is stored.
 
-Write-Host "Simulated process termination events created."
+2. `sourcetype=<your_sourcetype>`: Replace `<your_sourcetype>` with the name of the sourcetype that corresponds to the log data you want to search. This helps narrow down the search to relevant log sources.
+
+3. `(command="/usr/bin/unshadow /etc/passwd /etc/shadow > /tmp/crack.password.db" OR cmdline="*unshadow*")`: This part of the query looks for two conditions:
+   - It searches for events where the `command` field matches the exact execution command of the `unshadow` utility, which is `/usr/bin/unshadow /etc/passwd /etc/shadow > /tmp/crack.password.db`.
+   - It also searches for events where the `cmdline` field contains the word "unshadow." This covers cases where the utility might be invoked with different arguments or variations.
+
+4. `NOT (user=root)`: This part of the query excludes events where the `user` field is set to "root" because, as per your description, `/etc/shadow` is only readable by the root user by default. If you expect legitimate root usage, you can adjust this part of the query to suit your specific environment.
+
+Make sure to replace `<your_index>` and `<your_sourcetype>` with appropriate values for your Splunk setup. Additionally, adjust the query as needed to match the specifics of your environment and log sources.
 
 
 
-# Define the process name
-$processName = "notepad"
 
-# Define the number of iterations (adjust as needed)
-$iterations = 20
+To detect the activity associated with the four atomic tests you've provided, you can create a Splunk search query that looks for relevant commands and activities in your log data. Here's a search query that should help you detect these activities:
 
-# Loop to open and close Notepad
-for ($i = 1; $i -le $iterations; $i++) {
-    # Start Notepad
-    Start-Process $processName
-    
-    # Sleep for a few seconds (adjust as needed)
-    Start-Sleep -Seconds 1
-    
-    # Close Notepad
-    Get-Process -Name $processName | ForEach-Object { $_.CloseMainWindow() }
-    
-    # Sleep again before the next iteration (adjust as needed)
-    Start-Sleep -Seconds 1
-}
+```spl
+index=<your_index> sourcetype=<your_sourcetype>
+| search (command="sudo cat /etc/shadow > * OR cat *") OR
+  (command="cat /etc/passwd > * OR cat *") OR
+  (command="echo -e \"e /etc/passwd\\n,p\\ne /etc/shadow\\n,p\\n\" | ed > *") OR
+  (command="function testcat(){ echo \"$(< $1)\"; } testcat /etc/passwd > * OR testcat /etc/shadow > *")
+| eval test_type=case(
+    match(command, "sudo cat /etc/shadow > *|cat *"), "Atomic Test #1 - Access /etc/shadow (Local)",
+    match(command, "cat /etc/passwd > *|cat *"), "Atomic Test #2 - Access /etc/passwd (Local)",
+    match(command, "echo -e \"e /etc/passwd\\n,p\\ne /etc/shadow\\n,p\\n\" | ed > *"), "Atomic Test #3 - Access /etc/{shadow,passwd} with a standard bin that's not cat",
+    match(command, "function testcat(){ echo \"$(< $1)\"; } testcat /etc/passwd > *|testcat /etc/shadow > *"), "Atomic Test #4 - Access /etc/{shadow,passwd} with shell builtins"
+)
+| table _time, user, host, command, test_type
+```
 
-Write-Host "Simulated process creation and termination completed."
+Here's a breakdown of this Splunk search query:
 
-Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
--------  ------    -----      -----     ------     --  -- -----------
-    185      11     1924      11860       0.06   7848   0 notepad
-    185      11     1924      11860       0.05   8320   0 notepad
-    185      11     1944      11884       0.11  11556   0 notepad
-    185      11     1936      11884       0.11  13748   0 notepad
-    185      11     2028      11900       0.06  14116   0 notepad
-    185      11     2084      11932       0.08  18116   0 notepad
-    185      11     1944      11876       0.06  26676   0 notepad
-    185      11     1936      11876       0.09  31684   0 notepad
-    185      11     1920      11856       0.05  32844   0 notepad
-    185      11     1952      11880       0.13  33288   0 notepad
-    185      11     1944      11876       0.09  48144   0 notepad
-    185      11     1944      11872       0.13  51336   0 notepad
-    185      11     1944      11876       0.05  56128   0 notepad
-    185      11     1948      11880       0.13  57388   0 notepad
-    185      11     1936      11876       0.08  58108   0 notepad
-    185      11     2032      11916       0.06  59996   0 notepad
-    185      11     1940      11864       0.13  61840   0 notepad
-    185      11     1940      11888       0.08  63284   0 notepad
-    185      11     1932      11868       0.13  65092   0 notepad
-    185      11     1940      11864       0.08  65892   0 notepad
-    185      11     1940      11900       0.06  68424   0 notepad
-    185      11     1924      11856       0.03  70588   0 notepad
-    185      11     1940      11876       0.09  79244   0 notepad
-# Get all processes named "notepad"
-$notepadProcesses = Get-Process | Where-Object { $_.ProcessName -eq "notepad" }
+1. Replace `<your_index>` and `<your_sourcetype>` with the appropriate values for your Splunk setup.
 
-# Loop through the processes and stop them
-foreach ($process in $notepadProcesses) {
-    Stop-Process -Id $process.Id -Force
-    Write-Host "Stopped Notepad process with ID $($process.Id)"
-}
+2. The `search` command filters events based on specific command patterns that match the atomic tests you've described. It looks for commands that are indicative of each test scenario.
 
+3. The `eval` command assigns a `test_type` field to each event, indicating which atomic test it matches based on the command pattern.
 
+4. Finally, the `table` command is used to display the relevant fields in the search results, including the timestamp (`_time`), user, host, command, and `test_type` to identify which atomic test was detected.
 
-# Define a list of applications to open and close
-$applications = @("notepad.exe", "calc.exe", "explorer.exe")
-
-# Define the number of iterations for each application (adjust as needed)
-$iterationsPerApp = 5
-
-# Loop through each application
-foreach ($app in $applications) {
-    # Open the application multiple times
-    for ($i = 1; $i -le $iterationsPerApp; $i++) {
-        Start-Process $app
-        Write-Host "Opened $app (Iteration $i)"
-        
-        # Sleep for a few seconds (adjust as needed)
-        Start-Sleep -Seconds 5
-        
-        # Close the application
-        Get-Process -Name $app | ForEach-Object { $_.CloseMainWindow() }
-        Write-Host "Closed $app (Iteration $i)"
-        
-        # Sleep again before the next iteration (adjust as needed)
-        Start-Sleep -Seconds 5
-    }
-}
-
-# Define a list of application file paths to open
-$applicationPaths = @("C:\Windows\System32\notepad.exe", "C:\Windows\System32\calc.exe", "C:\Windows\explorer.exe")
-
-# Define the list of process names to close
-$processNames = @("notepad.exe", "calc.exe", "explorer.exe")
-
-# Define the number of iterations for each application (adjust as needed)
-$iterationsPerApp = 5
-
-# Loop through each application
-foreach ($appPath in $applicationPaths) {
-    $appName = [System.IO.Path]::GetFileName($appPath)  # Extract the process name from the full path
-    
-    # Open the application multiple times
-    for ($i = 1; $i -le $iterationsPerApp; $i++) {
-        Start-Process $appPath
-        Write-Host "Opened $appName (Iteration $i)"
-        
-        # Sleep for a few seconds (adjust as needed)
-        Start-Sleep -Seconds 5
-        
-        # Close the application using just the process name
-        Get-Process -Name $appName | ForEach-Object { $_.CloseMainWindow() }
-        Write-Host "Closed $appName (Iteration $i)"
-        
-        # Sleep again before the next iteration (adjust as needed)
-        Start-Sleep -Seconds 5
-    }
-}
-
-
-# Define a list of application file paths to open
-$applicationPaths = @("C:\Windows\System32\notepad.exe", "C:\Windows\System32\calc.exe", "C:\Windows\explorer.exe")
-
-# Define a list of process names to close
-$processNames = @("notepad.exe", "calc.exe", "explorer.exe")
-
-# Define the number of iterations for each application (adjust as needed)
-$iterationsPerApp = 5
-
-# Loop through each application
-foreach ($appPath in $applicationPaths) {
-    $appName = [System.IO.Path]::GetFileName($appPath)  # Extract the process name from the full path
-    
-    # Open the application multiple times
-    for ($i = 1; $i -le $iterationsPerApp; $i++) {
-        Start-Process $appPath
-        Write-Host "Opened $appName (Iteration $i)"
-        
-        # Sleep for a few seconds (adjust as needed)
-        Start-Sleep -Seconds 5
-        
-        # Close the application using the corresponding process name
-        $processNameToClose = $processNames[$applicationPaths.IndexOf($appPath)]
-        Get-Process -Name $processNameToClose | ForEach-Object { $_.CloseMainWindow() }
-        Write-Host "Closed $processNameToClose (Iteration $i)"
-        
-        # Sleep again before the next iteration (adjust as needed)
-        Start-Sleep -Seconds 5
-    }
-}
-
+This query should help you detect the specified activities associated with the four atomic tests. Make sure to adjust the index and sourcetype to match your environment, and test it in your lab or test environment before implementing it in production.
