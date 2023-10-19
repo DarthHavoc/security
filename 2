@@ -1,3 +1,69 @@
+index=<your_index> sourcetype=<your_sourcetype>
+| stats count by host, sourcetype, source, index, _time, source, _raw, user, file_extension, file_name
+| eval is_ransomware_note = case(
+    isnull(file_name), 0,  # No file name, ignore
+    match(file_name, "(?i)\.txt$|\.html$|\.hta$"), 1,  # Check if the file has the specified extensions
+    true(), 0  # Otherwise, ignore
+)
+| where is_ransomware_note=1
+| table host, sourcetype, source, index, _time, source, _raw, user, file_extension, file_name
+| sort -_time
+
+Replace <your_index> and <your_sourcetype> with your actual Splunk index and sourcetype.
+It counts the occurrences of events by host, sourcetype, source, index, and time.
+It evaluates whether the file is a potential ransomware note by checking its extension (i.e., .txt, .html, or .hta). You can adjust the extensions in the match() function if needed.
+It filters for events where is_new_ransomware is 1, indicating potential ransomware note files.
+The search results are then sorted in descending order of time.
+Please note that this search query focuses on identifying potential ransomware note files based on their extension. 
+
+Second Search:
+
+    The second search query directly filters events based on certain criteria, such as EventCode=11 and the file_name field, focusing on the creation of specific file types (e.g., .txt, .html, .hta).
+    It then performs time-based analysis by binning the time into 10-second intervals and aggregates data within those intervals.
+    The where unique_readme_path_count >= 15 condition is used to filter for events with a count of unique TargetFilename values, making it suitable for detecting ransomware-like behavior where multiple files are rapidly created within a short timeframe.
+    The query ends with presenting the results in a table and sorting them.
+
+Combined Search:
+
+    The combined search incorporates elements of the second search, but it also includes an initial evaluation of potential ransomware note files based on file extensions using the eval statement.
+    It uses EventCode=11 and eval conditions to identify potential ransomware notes and then proceeds to bin the time, aggregate data, and apply the count threshold as in the second search.
+    The combined search essentially combines the initial ransomware note identification and the subsequent time-based analysis and aggregation into a single query.
+
+index=<your_index> sourcetype=<your_sourcetype> (EventCode=11 OR <additional_event_code>) 
+| eval is_ransomware_note = case(
+    isnull(file_name), 0,  # No file name, ignore
+    match(file_name, "(?i)\.txt$|\.html$|\.hta$"), 1,  # Check if the file has the specified extensions
+    true(), 0  # Otherwise, ignore
+)
+| bin _time span=10s
+| stats min(_time) as firstTime max(_time) as lastTime dc(TargetFilename) as unique_readme_path_count values(TargetFilename) as list_of_readme_path by Computer Image file_name 
+| rename Computer as dest
+| where (is_ransomware_note=1 OR unique_readme_path_count >= 15)
+| table host, sourcetype, source, index, _time, source, _raw, user, file_extension, file_name
+| sort -_time
+
+--------------
+    Initial Evaluation Based on File Extensions:
+        It begins by searching for events in the specified index and sourcetype with EventCode=11 or the <additional_event_code>.
+        It then evaluates whether the file is a potential ransomware note by checking the file name and extension. The eval statement sets the is_ransomware_note field to 1 if the file has a name and extension matching .txt, .html, or .hta. If not, it sets it to 0.
+
+    Time Binning and Aggregation:
+        Following the initial evaluation, it proceeds to bin the _time field into 10-second intervals using the bin command.
+        It then calculates statistics like the minimum and maximum times, the count of unique TargetFilename, and creates a list of TargetFilename within each time bin.
+        It renames the Computer field to dest.
+
+    Final Filtering and Output:
+        After the time binning and aggregation, it applies a final filter with the where statement. It selects events that meet either of these conditions:
+            is_ransomware_note=1, meaning they were initially identified as potential ransomware notes based on file extensions.
+            unique_readme_path_count >= 15, meaning they exhibit a count of unique TargetFilename values greater than or equal to 15 within the 10-second time bins.
+
+    Results Presentation:
+        The query concludes by presenting the selected events in a table, including various fields like host, sourcetype, source, index, _time, source, _raw, user, file_extension, and file_name.
+        The results are sorted by _time in descending order.
+
+
+
+
 @echo off
 echo "dcrypt.exe simulated behavior"
 echo "This is a test script and not a real executable."
