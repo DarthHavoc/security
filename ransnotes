@@ -1,0 +1,15 @@
+index=cisnet-ws  `sysmon` EventCode=11  
+| eval is_ransomware_note = case(
+    isnull(TargetFilename), 0,  ```No file name, ignore```
+    match(TargetFilename, "(?i)\.txt$|\.html$|\.hta$"), 1,  ```Check if the file has the specified extensions```
+    true(), 0  ```Otherwise, ignore```
+)
+| bin _time span=10s
+```| eval User=mvindex(User,-1)```
+| replace "NOT_TRANSLATED" with "" IN User
+| stats min(_time) as firstTime max(_time) as lastTime dc(TargetFilename) as unique_readme_path_count values(User) as User values(TargetFilename) as list_of_readme_path by ComputerName
+| rename ComputerName as dest
+| where (is_ransomware_note=1 OR unique_readme_path_count >= 15)
+| eval firstTime=strftime(firstTime,"%Y/%m/%d %T")
+| table firstTime, dest, User, unique_readme_path_count
+| sort -firstTime
