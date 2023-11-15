@@ -31,3 +31,315 @@ for ($i = 1; $i -le $fileCount; $i++) {
 
 # Display a message indicating the completion of file creation
 Write-Host "Dummy files created successfully in $targetPath"
+_______________________
+index=cisnet-ws `sysmon`
+(EventCode=1 OR EventCode=3 OR EventCode=11 OR EventCode=13) 
+| eval relevant_command = coalesce(
+    Command_Line, 
+    dest, 
+    replace(
+        replace(
+            replace(
+                replace(
+                    replace(
+                        replace(
+                            replace(
+                                replace(
+                                    CommandLine,
+                                    "diskpart /s *",
+                                    "diskpart"
+                                ),
+                                "mountvol *",
+                                "mountvol"
+                            ),
+                            "bcdedit /create *",
+                            "bcdedit"
+                        ),
+                        "vssadmin *",
+                        "vssadmin"
+                    ),
+                    "cipher *",
+                    "cipher"
+                ),
+                "netsh *",
+                "netsh"
+            ),
+            "wmic *",
+            "wmic"
+        ),
+        "wevtutil *",
+        "wevtutil"
+    )
+)
+| eval relevant_command_lower = lower(relevant_command)
+| search relevant_command_lower=*encrypt* OR relevant_command_lower=*decrypt* OR relevant_command_lower=*cipher* OR relevant_command_lower=*crypt* OR relevant_command_lower=*mountvol* OR relevant_command_lower=*vssadmin* OR relevant_command_lower=*diskpart*
+OR relevant_command_lower=*create* OR relevant_command_lower=*modify* OR relevant_command_lower=*file* OR relevant_command_lower=*powershell* OR relevant_command_lower=*script* OR relevant_command_lower=*reg* OR relevant_command_lower=*privilege*
+| stats min(_time) as firstTime max(_time) as lastTime values(User) as Users values(relevant_command) as Commands by ComputerName
+| eval DurationInSeconds = lastTime - firstTime
+| where DurationInSeconds > 30  # Adjust this threshold as needed
+| eval firstTime=strftime(firstTime,"%Y/%m/%d %T"), lastTime=strftime(lastTime,"%Y/%m/%d %T")
+| table firstTime, lastTime, ComputerName, Users, Commands, DurationInSeconds
+| sort -firstTime
+___---__
+Certainly, let's break down the key components of the Splunk search query:
+
+```spl
+index=cisnet-ws `sysmon`
+(EventCode=1 OR EventCode=3 OR EventCode=11 OR EventCode=13) 
+```
+
+- **`sysmon` Macro:** This query uses the `sysmon` macro, which is likely defined elsewhere in your Splunk configuration. Macros in Splunk allow you to define reusable pieces of search logic. In this case, it's used to filter events from the `cisnet-ws` index with specific Sysmon event codes (1, 3, 11, 13), which are often associated with command execution, network connections, file creations, and registry modifications.
+
+```spl
+| eval relevant_command = coalesce(
+    Command_Line, 
+    dest, 
+    replace(
+        replace(
+            replace(
+                replace(
+                    replace(
+                        replace(
+                            replace(
+                                replace(
+                                    CommandLine,
+                                    "diskpart /s *",
+                                    "diskpart"
+                                ),
+                                "mountvol *",
+                                "mountvol"
+                            ),
+                            "bcdedit /create *",
+                            "bcdedit"
+                        ),
+                        "vssadmin *",
+                        "vssadmin"
+                    ),
+                    "cipher *",
+                    "cipher"
+                ),
+                "netsh *",
+                "netsh"
+            ),
+            "wmic *",
+            "wmic"
+        ),
+        "wevtutil *",
+        "wevtutil"
+    )
+)
+```
+
+- **`eval relevant_command`:** This part of the query creates a new field called `relevant_command`. It uses the `coalesce` function to prioritize the values of the `Command_Line` and `dest` fields. It then applies a series of nested `replace` functions to normalize the command string by replacing specific patterns with simplified versions (e.g., replacing "diskpart /s *" with just "diskpart"). This normalization helps in grouping similar commands together for analysis.
+
+```spl
+| eval relevant_command_lower = lower(relevant_command)
+```
+
+- **`eval relevant_command_lower`:** This line creates another field called `relevant_command_lower`, which contains the lowercase version of the `relevant_command` field. This step is often done to make searches case-insensitive.
+
+```spl
+| search relevant_command_lower=*encrypt* OR relevant_command_lower=*decrypt* OR relevant_command_lower=*cipher* OR relevant_command_lower=*crypt* OR relevant_command_lower=*mountvol* OR relevant_command_lower=*vssadmin* OR relevant_command_lower=*diskpart*
+OR relevant_command_lower=*create* OR relevant_command_lower=*modify* OR relevant_command_lower=*file* OR relevant_command_lower=*powershell* OR relevant_command_lower=*script* OR relevant_command_lower=*reg* OR relevant_command_lower=*privilege*
+```
+
+- **`search` command:** This section filters events based on the `relevant_command_lower` field. It looks for events where the `relevant_command_lower` field contains keywords related to encryption or decryption (`*encrypt*`, `*decrypt*`, `*cipher*`, `*crypt*`, etc.) and other behaviors associated with ransomware activities.
+
+```spl
+| stats min(_time) as firstTime max(_time) as lastTime values(User) as Users values(relevant_command) as Commands by ComputerName
+```
+
+- **`stats` command:** This command aggregates the results, calculating the earliest (`min(_time)`) and latest (`max(_time)`) timestamps, collecting unique user values (`values(User)`), and collecting unique command values (`values(relevant_command)`) for each `ComputerName`.
+
+```spl
+| eval DurationInSeconds = lastTime - firstTime
+```
+
+- **`eval DurationInSeconds`:** This line calculates the duration of the activity by subtracting the earliest timestamp from the latest timestamp.
+
+```spl
+| where DurationInSeconds > 30
+```
+
+- **`where` command:** This filters the results to include only events with a duration greater than 30 seconds. This threshold is used to exclude short-lived processes and focus on potentially significant activities.
+
+```spl
+| eval firstTime=strftime(firstTime,"%Y/%m/%d %T"), lastTime=strftime(lastTime,"%Y/%m/%d %T")
+```
+
+- **`eval` commands:** These lines format the `firstTime` and `lastTime` fields to display them in a more human-readable date and time format.
+
+```spl
+| table firstTime, lastTime, ComputerName, Users, Commands, DurationInSeconds
+```
+
+- **`table` command:** This command specifies which fields to display in the final tabular output.
+
+```spl
+| sort -firstTime
+```
+
+- **`sort` command:** Finally, the results are sorted based on the earliest timestamp (`-firstTime`), presenting them in chronological order.
+
+In summary, this Splunk search is designed to identify potential ransomware-related behaviors by analyzing Sysmon events, normalizing command strings, searching for relevant keywords, and aggregating and presenting the results in a tabular format. The focus is on detecting patterns of behavior associated with disk encryption or decryption rather than specific commands or tools.
+
+----------------------------
+# PowerShell script to generate events for Sysmon/Splunk testing
+
+# Simulate diskpart command
+Write-Host "Running: diskpart /s script.txt"
+Start-Process -FilePath "diskpart.exe" -ArgumentList "/s", "script.txt" -Wait
+
+# Simulate mountvol command
+Write-Host "Running: mountvol C:\mountpoint"
+Start-Process -FilePath "mountvol.exe" -ArgumentList "C:\mountpoint" -Wait
+
+# Simulate bcdedit command
+Write-Host "Running: bcdedit /create /d 'Test Entry' /application osloader"
+Start-Process -FilePath "bcdedit.exe" -ArgumentList "/create", "/d", "'Test Entry'", "/application", "osloader" -Wait
+
+# Simulate vssadmin command
+Write-Host "Running: vssadmin create shadow /for=C:"
+Start-Process -FilePath "vssadmin.exe" -ArgumentList "create", "shadow", "/for=C:" -Wait
+
+# Simulate cipher command
+Write-Host "Running: cipher /e /s:C:\"
+Start-Process -FilePath "cipher.exe" -ArgumentList "/e", "/s:C:\" -Wait
+
+# Simulate netsh command
+Write-Host "Running: netsh interface show interface"
+Start-Process -FilePath "netsh.exe" -ArgumentList "interface", "show", "interface" -Wait
+
+# Simulate wmic command
+Write-Host "Running: wmic process get caption"
+Start-Process -FilePath "wmic.exe" -ArgumentList "process", "get", "caption" -Wait
+
+# Simulate wevtutil command
+Write-Host "Running: wevtutil el"
+Start-Process -FilePath "wevtutil.exe" -ArgumentList "el" -Wait
+
+# Simulate PowerShell script execution
+Write-Host "Running: powershell.exe -File script.ps1"
+Start-Process -FilePath "powershell.exe" -ArgumentList "-File", "script.ps1" -Wait
+
+# Simulate registry modification (adjust as needed)
+Write-Host "Modifying registry..."
+New-Item -Path "HKLM:\Software\MyApp" -Force
+Set-ItemProperty -Path "HKLM:\Software\MyApp" -Name "TestKey" -Value "TestValue"
+
+# Simulate file creation/modification (adjust as needed)
+Write-Host "Creating/modifying files..."
+New-Item -Path "C:\TestFile.txt" -ItemType "file" -Force
+Add-Content -Path "C:\TestFile.txt" -Value "This is a test."
+
+# Simulate privilege escalation (adjust as needed)
+Write-Host "Simulating privilege escalation..."
+$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = New-Object System.Security.Principal.WindowsPrincipal($identity)
+$isAdmin = $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $isAdmin) {
+    Write-Host "Running: Start-Process powershell -Verb runAs"
+    Start-Process powershell.exe -Verb runAs
+}
+
+# Simulate duration to trigger the search condition
+Start-Sleep -Seconds 60
+
+
+
+---------____---------------------------
+index=cisnet-ws `sysmon`
+(EventCode=1 OR EventCode=3 OR EventCode=11 OR EventCode=13)
+| eval relevant_command = coalesce(
+    CommandLine,
+    dest,
+    replace(
+        replace(
+            replace(
+                replace(
+                    replace(
+                        replace(
+                            replace(
+                                replace(
+                                    CommandLine,
+                                    "CryptAcquireContext*",
+                                    "NCryptOpenStorageProvider"
+                                ),
+                                "CryptCreateHash*",
+                                "BCryptCreateHash"
+                            ),
+                            "CryptHashData*",
+                            "BCryptHashData"
+                        ),
+                        "CryptDeriveKey*",
+                        "NCryptDeriveKey"
+                    ),
+                    "CryptEncrypt*",
+                    "BCryptEncrypt"
+                ),
+                "CryptDestroyHash*",
+                "BCryptDestroyHash"
+            ),
+            "CryptDestroyKey*",
+            "BCryptDestroyKey"
+        ),
+        "CryptReleaseContext*",
+        "NCryptFreeObject"
+    )
+)
+| eval relevant_command_lower = lower(relevant_command)
+| search relevant_command_lower=*ncryptopenstorageprovider* OR relevant_command_lower=*bcryptcreatehash* OR relevant_command_lower=*bcrypthashdata* OR relevant_command_lower=*ncryptderivekey* OR relevant_command_lower=*bcryptencrypt* OR relevant_command_lower=*bcryptdestroyhash* OR relevant_command_lower=*bcryptdestroykey* OR relevant_command_lower=*ncryptfreeobject*
+| stats min(_time) as firstTime max(_time) as lastTime values(User) as Users values(relevant_command) as Commands by ComputerName
+| eval DurationInSeconds = lastTime - firstTime
+| where DurationInSeconds > 30  # Adjust this threshold as needed
+| eval firstTime=strftime(firstTime,"%Y/%m/%d %T"), lastTime=strftime(lastTime,"%Y/%m/%d %T")
+| table firstTime, lastTime, ComputerName, Users, Commands, DurationInSeconds
+| sort -firstTime
+
+
+___________________________
+# PowerShell script to simulate cryptographic operations with events for Sysmon
+
+# Function to simulate opening a storage provider
+function Simulate-OpenStorageProvider {
+    Write-Host "Simulating: NCryptOpenStorageProvider"
+    # This action does not directly generate Sysmon events
+}
+
+# Function to simulate creating a hash and writing to a file
+function Simulate-CreateHashAndWriteToFile {
+    Write-Host "Simulating: BCryptCreateHash"
+    $hash = "hashed_data" | Get-Hash -Algorithm SHA256
+    $hash | Out-File -FilePath "C:\path\to\output\file.txt" -Force
+}
+
+# Function to simulate hashing data
+function Simulate-HashData {
+    Write-Host "Simulating: BCryptHashData"
+    # This action does not directly generate Sysmon events
+}
+
+# Function to simulate deriving a key and accessing the registry
+function Simulate-DeriveKeyAndAccessRegistry {
+    Write-Host "Simulating: NCryptDeriveKey"
+    $key = "derived_key"
+    Set-ItemProperty -Path "HKLM:\Software\MyApp" -Name "SecretKey" -Value $key
+}
+
+# Function to simulate encrypting data and creating a network connection
+function Simulate-EncryptAndNetworkConnection {
+    Write-Host "Simulating: BCryptEncrypt"
+    # Encrypt data (this action does not directly generate Sysmon events)
+
+    Write-Host "Simulating: Creating a network connection"
+    Invoke-WebRequest -Uri "http://example.com" -UseBasicParsing
+}
+
+# Simulate cryptographic operations with additional actions
+Simulate-OpenStorageProvider
+Simulate-CreateHashAndWriteToFile
+Simulate-HashData
+Simulate-DeriveKeyAndAccessRegistry
+Simulate-EncryptAndNetworkConnection
+
