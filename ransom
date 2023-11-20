@@ -35,9 +35,9 @@ index=cisnet-ws `sysmon` EventCode=11
     match(TargetFilename, "(?i)\.txt$|\.html$|\.hta$"), 1,
     true(), 0
 )
-| transaction ComputerName maxspan=15s keepevicted=true
+| bin _time span=15s
+| stats count by _time, ComputerName, User, host, Image, TargetFilename, is_ransomware_note
 | where is_ransomware_note=1 AND count>=5  // Adjust the threshold as needed
-| eval firstTime=strftime(min(_time), "%Y/%m/%d %T"),
-       lastTime=strftime(max(_time), "%Y/%m/%d %T")
-| table firstTime, lastTime, ComputerName, User, host, Image, TargetFilename, count
+| eval firstTime=strftime(_time, "%Y/%m/%d %T")
+| table firstTime, ComputerName, User, host, Image, TargetFilename, count
 | sort firstTime
