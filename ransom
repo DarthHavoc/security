@@ -1,10 +1,23 @@
-index=cisnet-ws `sysmon` EventCode=11 TargetFilename IN ("*\.txt", "*\.html", "*\.hta")
-| bin _time span=10s
-| dedup ComputerName, _time, TargetFilename
-| replace "NOT_TRANSLATED" with "" IN User
-| stats min(_time) as firstTime max(_time) as lastTime dc(TargetFilename) as unique_readme_path_count values(TargetFilename) as list_of_readme_path by ComputerName Image TargetFilename User
-| where unique_readme_path_count >= 1
-| eval firstTime=strftime(firstTime,"%Y/%m/%d %T")
-| eval lastTime=strftime(lastTime, "%Y/%m/%d %T")
-| table firstTime, lastTime, ComputerName, User, host, Image, TargetFilename, unique_readme_path_count
-| sort -firstTime
+This search query looks for events associated with command execution, network connections, file creations, and registry modifications. It then extracts the relevant command from the CommandLine field and filters for commands that contain keywords associated with encryption, decryption, ciphering, mounting volumes, and other related activities.
+The provided Splunk search query is designed to detect commands or processes associated with disk encryption or decryption behaviors on Windows systems. Here's a breakdown of what this query would detect:
+
+    EventCode Filtering:
+        The search begins by filtering events with relevant EventCodes (1, 3, 11, 13), which are commonly associated with command execution, network connections, file creations, and registry modifications.
+
+    Command Extraction:
+        The relevant_command field is created by extracting relevant information from the CommandLine field. This includes replacing specific patterns associated with encryption-related commands like diskpart, mountvol, bcdedit, vssadmin, cipher, netsh, wmic, and wevtutil.
+
+    Keyword Search:
+        The search then looks for commands containing keywords related to encryption or decryption, such as "encrypt," "decrypt," "cipher," "crypt," "mountvol," "vssadmin," "diskpart," and others.
+
+this Splunk search is designed to identify potential ransomware-related behaviors by analyzing Sysmon events, normalizing command strings, searching for relevant keywords, and aggregating and presenting the results in a tabular format. The focus is on detecting patterns of behavior associated with disk encryption or decryption rather than specific commands or tools.
+
+    search command: This section filters events based on the relevant_command_lower field. It looks for events where the relevant_command_lower field contains keywords related to encryption or decryption (*encrypt*, *decrypt*, *cipher*, *crypt*, etc.) and other behaviors associated with ransomware activities.
+
+This modified query incorporates events from both Sysmon and Windows Event Logs. It is crucial to ensure that the necessary Windows Event Logs are configured to capture the relevant information. Additionally, consider the potential increase in data volume and performance impact when monitoring a broader range of activities.
+
+Creating a Splunk search to detect the behavioral activity associated with the described hybrid encryption approach involves looking for specific Windows API calls related to both symmetric and asymmetric encryption algorithms. Below is a search query template that you can adapt and extend based on your specific requirements and environment:
+
+This search focuses on commands related to the Windows API functions commonly used in the described hybrid encryption approach. It looks for commands containing keywords related to the API functions like CryptAcquireContext, CryptCreateHash, CryptHashData, CryptDeriveKey, CryptEncrypt, CryptDestroyHash, CryptDestroyKey, and CryptReleaseContext.
+
+his search includes the modern cryptographic API functions related to the mentioned operations. However, it's crucial to note that the effectiveness of this search depends on the actual techniques used by threat actors in your environment. Always stay informed about the latest cryptographic functions and their usage patterns in malware to enhance your detection capabilities.
