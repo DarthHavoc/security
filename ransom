@@ -27,3 +27,17 @@ for ($i = 1; $i -le $fileCount; $i++) {
 
 # Display a message indicating the completion of file creation
 Write-Host "Dummy files created successfully in $targetPath"
+
+
+index=cisnet-ws `sysmon` EventCode=11
+| eval is_ransomware_note = case(
+    isnull(TargetFilename), 0,
+    match(TargetFilename, "(?i)\.txt$|\.html$|\.hta$"), 1,
+    true(), 0
+)
+| transaction ComputerName maxspan=15s keepevicted=true
+| where is_ransomware_note=1 AND count>=5  // Adjust the threshold as needed
+| eval firstTime=strftime(min(_time), "%Y/%m/%d %T"),
+       lastTime=strftime(max(_time), "%Y/%m/%d %T")
+| table firstTime, lastTime, ComputerName, User, host, Image, TargetFilename, count
+| sort firstTime
