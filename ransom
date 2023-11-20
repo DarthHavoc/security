@@ -1,43 +1,10 @@
-index=cisnet-ws `sysmon` EventCode=11
-| eval is_ransomware_note = case(
-    isnull(TargetFilename), 0,  ```No file name, ignore```
-    match(TargetFilename, "(?i)\.txt$|\.html$|\.hta$"), 1,  ```Check if the file has the specified extensions```
-    true(), 0  ```Otherwise, ignore```
-)
+index=cisnet-ws `sysmon` EventCode=11 TargetFilename IN ("*\.txt", "*\.html", "*\.hta")
 | bin _time span=10s
+| dedup ComputerName, _time, TargetFilename
 | replace "NOT_TRANSLATED" with "" IN User
-| stats min(_time) as firstTime max(_time) as lastTime dc(TargetFilename) as unique_readme_path_count values(TargetFilename) as list_of_readme_path by ComputerName Image User, host, _raw, TargetFilename
-| where (is_ransomware_note=1 OR unique_readme_path_count >= 15)
+| stats min(_time) as firstTime max(_time) as lastTime dc(TargetFilename) as unique_readme_path_count values(TargetFilename) as list_of_readme_path by ComputerName Image TargetFilename User
+| where unique_readme_path_count >= 1
 | eval firstTime=strftime(firstTime,"%Y/%m/%d %T")
-| table firstTime, ComputerName, User, host, Image, TargetFilename,unique_readme_path_count 
+| eval lastTime=strftime(lastTime, "%Y/%m/%d %T")
+| table firstTime, lastTime, ComputerName, User, host, Image, TargetFilename, unique_readme_path_count
 | sort -firstTime
-
-# Set the path where you want to create dummy files
-$targetPath = "C:\Users\rakhan.CIS1\OneDrive - USCIS\Desktop"
-
-# Set the number of dummy files to create
-$fileCount = 20
-
-# Create dummy files with random names and extensions in the specified path
-for ($i = 1; $i -le $fileCount; $i++) {
-    $fileName = "ransomware_note_$i.txt"
-    $filePath = Join-Path -Path $targetPath -ChildPath $fileName
-    $null = New-Item -Path $filePath -ItemType File
-}
-
-# Display a message indicating the completion of file creation
-Write-Host "Dummy files created successfully in $targetPath"
-
-
-index=cisnet-ws `sysmon` EventCode=11
-| eval is_ransomware_note = case(
-    isnull(TargetFilename), 0,
-    match(TargetFilename, "(?i)\.txt$|\.html$|\.hta$"), 1,
-    true(), 0
-)
-| bin _time span=15s
-| stats count by _time, ComputerName, User, host, Image, TargetFilename, is_ransomware_note
-| where is_ransomware_note=1 AND count>=5  // Adjust the threshold as needed
-| eval firstTime=strftime(_time, "%Y/%m/%d %T")
-| table firstTime, ComputerName, User, host, Image, TargetFilename, count
-| sort firstTime
