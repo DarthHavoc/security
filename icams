@@ -1,0 +1,345 @@
+ 
+
+
+U.S. Department of Homeland Security
+
+DHS 4300A,
+“Information Technology System Security Program,
+Sensitive Systems”
+Attachment <insert letter>
+
+
+
+Department of Homeland Security Enterprise
+ Identity, Credential, and Access Management (ICAM)
+
+Version Number: 01
+Issue Date: September 18, 2023
+ 
+Contents
+I.	Purpose	3
+II.	Scope	3
+III.	References	3
+IV.	Definitions	4
+V.	Responsibilities	6
+VI.	Governance and Procedures	8
+VII.	Identity and Access Control Requirements	9
+VIII.	Questions	13
+ 
+I.	Purpose
+This document establishes the Identity, Credential, and Access Management (ICAM) policy for the Department of Homeland Security (DHS) Headquarters (DHS Enterprise/MGMT). This includes third-party information systems and applications approved for use by Enterprise /MGMT personnel. If any part of this policy conflicts with federal law, the federal law supersedes this policy. Only the Enterprise/MGMT Chief Information Officer (CIO) or DHS Chief Information Officer (CIO) may issue revisions to this policy.
+
+II.	Authorities and References
+A.	Public Law 107-347, “E-Government Act of 2002, Title III, Federal Information Security Management Act.”
+B.	Public Law No. 113-283, “Federal Information Security Modernization Act of 2014.”
+C.	Executive Order 13741, “Reforming Processes Related to Suitability for Government Employment, Fitness for Contractor Employees, and Eligibility for Access to Classified National Security Information.”
+D.	Executive Order 13800, “Strengthening the Cybersecurity of Federal Networks and Critical Infrastructure.”
+E.	Office of Management and Budget Memorandum M-19-17, “Enabling Mission
+Delivery through Improved Identity, Credential, and Access Management.”
+F.	Federal Chief Information Officers (CIO) Council, “Federal Identity, Credential, and Access Management Roadmap and Implementation Guidance,” Version 2.0.
+G.	National Institute of Standards and Technology (NIST), “Federal Information Processing Standard Publication 201-3: Personal Identity Verification (PIV) of Federal Employees and Contractors.”
+H.	DHS Directive 4300A, “Sensitive Systems Policy Directive,” Version 13.3.
+I.	DHS Directive 121-03, “Common Identification Standard for Department Personnel and Visitors.”
+J.	DHS Policy Directive 121-08, “Requirements for Security Review of Foreign National Assignments and Overseas Employment.”
+K.	Homeland Security Presidential Directive (HSPD)-12, “Policy for a Common
+Identification Standard for Federal Employees and Contractors.”
+L.	NIST Special Publication (SP) 800-63-3, “Digital Identity Guidelines.”
+M.	NIST Special Publication (SP) 800-53-5, “Security and Privacy Controls for
+Information Systems and Organizations.”
+N.	Executive Order 14028, “Improving the Nation’s Cybersecurity.”
+ 
+DHOMB M-22-09 “Moving the U.S. Government Toward Zero Trust Cybersecurity
+Principles.”
+O.	OMB M-18-19 for the Chief Operating Officer’s role and responsibilities.
+P.	DHS Directive Instruction 121-01-001 Organization of the Office of the Chief Information Officer. 
+Q.	DHS Directive 121-01 Chief Security Officer
+
+III.	Definitions
+A.	Access Management Enterprise Wide : Management and control of the ways that entities (e.g., persons, groups, information systems) are granted or denied access to the resources of an organization and authorized to perform a specific action(s) within a given resource for the right reason.
+
+B.	Credential: Authoritative evidence of an individual’s claimed identity. Credentials come in many types, from physical papers and cards (e.g., passport, PIV card) to electronic items (e.g., password, digital certificate), and often incorporate anti-tamper features.
+
+C.	Credential Management: Maintenance of a credential and associated support over its lifecycle of issuance, renewal, reissuance, suspension, revocation, and destruction.
+
+D.	Department Credentials: Consistent with DHS Directive 121-03 or DHS HSPD-12 Program publications, these credentials include the DHS PIV Card; DHS Derived Credentials (e.g., DHS Derived Alternate Credentials, DHS Derived PIV Credentials) as the common identification standard for secure devices and Component detailee management; temporary credentials (i.e., PIV Interoperable) as a common identification standard for temporary personnel; DHS PIV Official (PIV-O) Credentials as a credential for law enforcement (LE) and non-LE personnel; and visitor cards.
+
+E.	Governance: Alignment and coordination of operations and policies to meet the laws, regulations, standards, directives, and other guidance for information systems; alignment of federal agencies with common ICAM practices; and where necessary, review and alignment of policies to ensure consistency.
+
+F.	Identity Management (IdM): How an agency collects, verifies, and manages attributes to establish and maintain enterprise identities for federal employees and contractors.
+
+G.	Identity Proofing: The process of providing sufficient information (e.g., identity history, credentials, documents) to establish an identity.
+
+
+
+H.	Logical Access Control System (LACS): An automated information system that controls an individual’s ability to access one or more computer system resources, such as a workstation, network, application, or database. A LACS requires validation of an individual’s identity through a mechanism such as a PIN, card, biometric, or other token. It can assign different access privileges to different persons depending on roles and responsibilities in an organization.
+I.	Multi-Factor Authentication: An authentication system requiring more than one distinct factor for successful authentication. This authentication can use a multi-factor authenticator or a combination of authenticators that provide different factors. The three authentication factors consist of asking the system user to provide responses for the following prompts: something you know, something you have, and something you are.
+
+J.	Personal Identity Verification (PIV) Card: A physical artifact (e.g., identity card, “smart” card) issued to an individual that contains a PIV Card application that stores identity credentials (e.g., photograph, cryptographic keys, digitized fingerprint representation) so that the claimed identity of the cardholder can be verified against the stored credentials.
+
+K.	Physical Access Control System (PACS): An electronic, electro-mechanical, or mechanical system designed to identify and admit authorized personnel to a secure area and control physical access devices (e.g., PIV readers, door actuators and locks, surveillance cameras, etc.). Ability to obtain access may be based on any number of factors, such as special keys, badges, combinations, fingerprints, signature, and voice. These systems are for personnel access control only and are not to be used for the protection of stored information or materials.
+
+L.	Public Key: The public part of an asymmetric key pair that is typically used to verify signatures or encrypt data.
+
+M.	Public Key Infrastructure (PKI): The framework and services for generating, producing, distributing, controlling, destroying, and accounting for destroying public key certificates. PKI components include the personnel, policies, processes, server platforms, software, and workstations used to administer certificates and public-private key pairs, and the ability to issue, maintain, recover, and revoke public key certificates.
+ 
+IV.	Responsibilities
+
+A.	ICAM Executive Steering Committee (ESC)
+
+1.	Provides oversight for department-wide ICAM policies and objectives.
+2.	Oversees interagency, intergovernmental, and external coordination on ICAM related issues.
+
+B.	DHS Principal Deputy Chief Information Officer (HQ/MGMT CIO)
+
+1.	Oversees the MGMT Information Security Program.
+2.	Provides the resources to ensure MGMT is compliant with DHS security policy.
+
+C.	DHS Chief Security Officer (MGMT-HQ CSO)
+
+1.	Oversees the agency-wide responsibilities as documented in DHS Directive 121-01, “Chief Security Officer,” and DHS Instruction 121-01-001, “Organization of the Office of the Chief Security Officer,” to include:
+
+                               a.  Physical security and physical access control programs.
+                               b.  DHS HSPD-12 Program as codified in DHS Directive 121-03.
+
+2.	Provides the resources to ensure the agency is compliant with the DHS information security policy.
+
+D.	DHS Deputy Chief Information Security Officer (HQ/MGMT CISO)
+
+1.	Establishes and provides resources for the MGMT Information Security Program goals, objectives, and priorities.
+2.	Establishes logical access control policies and procedures, including guidelines for requesting and approving access to information systems during normal and contingency operations.
+
+E.	Information System Security Manager (ISSM)
+
+1.	Serves as the liaison and primary point of contact (POC) and coordination between program personnel responsible for cybersecurity and ICAM activities, assigned Information System Security Officers (ISSO), and the MGMT CISO for cybersecurity and ICAM matters.
+2.	Serves as the final federal approving authority for privileged accounts, roles, or security group access requests.
+
+F.	Information System Security Officer
+1.	Ensures information systems are configured according to DHS and MGMT requirements, including those requirements described in the ICAM SOPs.
+2.	Monitors and reports improper information system account use to the Security Operations Center, system owners, and account managers.
+ 
+               2.      ICAM Project Management Office
+
+3.	Establishes and supports ICAM and IT processes, standards, and necessary requirements to implement ICAM.
+4.	Develops and manages processes to protect personal identifiable information (PII) with the Component Privacy Office during the development and approval of all Department privacy compliance documentation.
+5.	Establishes and maintains the Component ICAM SOPs and ensures the processes and procedures comply with this policy and the authorities listed herein.
+
+G.	Supervisors/Managers
+
+1.	Certifies and regularly recertifies (at least annually) the accuracy of the access of their subordinates.
+              
+H.	Component Chief Information Officer
+
+
+I.	Component Chief Information Security Officer
+
+J.	System Owners
+
+1.	Maintains their information system’s ICAM lifecycle management requirements. This responsibility includes ensuring their information system is enrolled in ICAM authorization, defining workflows, processing information system access requests, and assigning appropriate approval access levels.
+2.	Defines separation of duty policies, including information system objects restrictions or access based upon subjects’ roles or assigned job duties.
+3.	Ensures all users have a valid requirement and documented approval to access the information system and are uniquely identified.
+
+K.	DHS Privacy Office
+
+1.	Provides subject matter expertise on information system privacy compliance procedures and operations.
+2.	Evaluates ICAM service proposals for privacy impacts and provides guidance to safeguard PII in accordance with federal law and policy.
+3.	Collaborates with ICAM branch throughout the development and approval of all Department privacy compliance documentation.
+
+L.	End Users
+
+1.	Submits appropriate requests for access based upon least privileged.
+2.	Signs user agreements before receiving user account access and adheres to acceptable use policies and procedures.
+3.	Completes initial and annual refresher Cybersecurity Awareness Training (CSAT) and other required trainings.
+4.	Uses all access accounts only for their intended purposes and complies with the rules of behavior.
+5.	Protects any credential tokens/secrets used with MGMT accounts to log on to MGMT information systems.
+6.	Updates account profile information, including the user’s direct supervisor.
+
+V.	Governance and Procedures
+Identity management establishes a trustworthy process to prove the identity of an individual, group, or system with a credential. The identity is bound to the credential, such as a PIV card, and is held and used by the individual throughout their employment with DHS from identity proofing to issuance, maintenance, termination, and revocation, as necessary. Access management ensures individuals are granted or denied access to buildings, computer systems, or data with the authentication of a user’s credential in alignment with access policy rules set by a facility/system owner.
+
+The DHS ICAM ESC is the authoritative governing body for digital identity, credentialing, and access services. The ICAM ESC is chaired by the DHS CIO, CSO, and CISO. All MGMT
+information systems and applications must adhere to ICAM specification standards and the requirements identified within this policy. These standards include the use of a common Privileged Access Request and Role Access Request process. Noncompliant legacy information systems must develop a roadmap to achieve compliance with this policy.
+
+VI.	Identity and Access Control Requirements
+A.	Privileged User Accounts and Role Based Access
+1.	Account request, creation, and/or modification
+ (a) Privileged Users will have to follow the 4300A Attachment G, DHS Rules of Behavior, with a signed acknowledgement of a Privileged User Agreement (Appendix A).
+2.	In addition, Privileged Users will be required to complete additional trainings:
+a.	DHS Privileged User Training
+b.	CSAT
+c.	Privacy at DHS: Protecting Personal Information
+d.	Records Management
+e.	Insider Threat Training
+f.	DHS HQ Role Based Training (e.g., System Administrator, Auditor)
+3.	Supervisors/Managers: The Privileged User’s (federal employee or
+ contractor) supervisor must be a federal employee with oversight of their responsibilities and must approve the account and/or role-based access request.
+4.	System/Application Security Personnel must approve the Privileged User’s
+         request. This process must include the ISSO, ISSM, and System Owner, with the final  
+         approving authority provided by the federal ISSM or the DHS Deputy CISO.
+5.	Elevated privileged for infrastructure, platforms, and systems must be
+         approved by OCIO. Note: Elevated privileges within an application (such as WebTA 
+Request Approvers, complete #s 1-4).
+B.	Account Disable and Deletion
+1.	Privileged User access must be disabled within 48 hours after a role change
+2.	
+ or other event that requires access removal. Examples of an event include moving to a new organization, change in responsibility, or moving to a new contract.
+3.	Privileged User’s account will be disabled after 30 da   ys of inactivity.
+ Required audit records will be retained.
+4.	Privileged User’s account will be deleted after 90 days from disabled date.
+Required audit requirements will be retained.
+5.	Users’ privileged access will be automatically disabled, except to
+                   Learning Management, if the user has not completed annual Privileged User and
+                   Cybersecurity Awareness Trainings.
+ 
+C.	Review of Privileged User Access/Accounts
+1.	Privileged Users access must be reviewed quarterly at a minimum to
+ ensure appropriate need to know access is maintained (i.e., least
+            privileged).
+2.	Privileged User review must be documented and approved by the ISSO,
+            ISSM, and System Owner, with the final approval authority provided by the federal ISSM or
+             the DHS Deputy CISO.     
+
+D.	Recertification of Privileged User Access/Accounts
+1.	Privileged Users must be recertified on an annual basis to ensure appropriate
+           need to know and role-based access is maintained (i.e., least privileged).
+2.	Privileged Users must annually complete the training requirements listed in
+           section V.2.a-e to maintain privileged access.
+3.	System or Application Security Personnel must approve the Privileged User’s
+           recertification. This process includes the ISSO, ISSM, and System Owner, with the final
+           approving authority provided by the federal ISSM/DHS Deputy CISO.
+
+
+
+
+
+E.	Non-Privileged User Accounts
+1.	Account request, creation, and/or modification
+a.	Non-Privileged Users will be required to complete the following
+            trainings:
+(1)	CSAT
+(2)	Privacy at DHS: Protecting Personal Information
+(3)	Records Management
+(4)	Insider Threat Training
+b.	Completed Rules of Behavior
+
+2.	Account Disable and Deletion
+a.	User access to network, email, privileged user, learning
+ management, financial applications, and high valued assets accounts shall be
+ disabled after an inactivity period of 30 days.
+b.	Non-Privileged User accounts will be deleted after 90 days of
+             inactivity and/or deactivation. Required audit requirements will be retained.
+c.	User access, except to Learning Management, will be
+             automatically disabled if the user has not completed annual CSAT.
+
+3.	Recertification of Non-Privileged User Access/Accounts
+a.	Non-Privileged Users must be recertified on an annual basis.
+b.	As part of the yearly contract review process in the Access
+             Lifecycle Management system, Contracting Officer representatives (CORs) must
+             verify the active contractors on each of their contracts.
+
+4.	Review of Privileged User Access/Accounts
+a.	Privileged Users access must be reviewed at a minimum,
+ quarterly to ensure appropriate need to know is maintained (i.e., least privileged).
+b.	Privileged User review must be documented and approved by the ISSO, ISSM, and System Owner, with the final approval authority provided by the federal ISSM/DHS Deputy CISO.
+
+F.	Onboarding of DHS Personnel (Federal Employee and Contractor) Identity and Access Management Requirements
+
+1.	Federal employee and contractors (Active Directory accounts, prior to network system access):
+a.	Users’ personnel security record must be vetted via automatic workflow or manual process) from the Office of the Chief Security Officer (OCSO). The OCSO is the DHS Enterprise source of authority for personnel security information, including suitability, investigation status, and security clearance for all DHS federal employees and contractors.
+b.	User’s onboarding does not proceed until there is an established entry on duty (EOD) date.
+c.	Federal employees must have an assigned active federal employee supervisor/manager.
+d.	Contractors must have an assigned active federal employee as their COR for all contracts.
+e.	Contract users must be working on a task order validated by the responsible COR.
+f.	Contract users offboarding date must align to the end of the valid contract or corresponding task order.
+2.	A federal manager is required to perform the following once the users EOD date has been determined:
+a.	Determine the required access levels and roles based upon Least Privilege.
+b.	Ensure segregation of duties are in place.
+c.	Ensure user has completed all access and account requirements.
+d.	Approve access and route the request for account provisioning.
+
+
+
+
+
+
+
+3.	Users must:
+a.	Follow the DHS PIV Card Issuance Process at the DHS Credentialing
+                             	Facility.
+b.	Adhere to acceptable use policies and procedures; sign user agreements
+ prior to receiving account access. Complete initial and annual refresher of
+		     the CSAT and other required trainings, as applicable.
+4.	System Administrators provide access based on the approved request.
+5.	Users Update account profile information, including the direct supervisor.
+6.	Supervisors/Managers Certify and recertify that their subordinates access is appropriate based on current role and duties assigned at least annually. This includes any application or account that includes the functions to add, modify, delete, and enable.
+
+
+
+
+
+
+G.	Offboarding of DHS Personnel (Federal and Contractor) Identity and Access Management Requirements
+1.	Voluntary Transfer/Termination
+a.	Supervisor/manager must initiate the process for transfer/offboarding 
+                         (outside of their current Component) in Human Resource (HR) system of       record and follow Component Transfer/Offboarding process before a user’s last         employment date.
+(1)	At a minimum, Components shall ensure HR is notified within
+              14 business days.
+b.	User turns in PIV and Government Furnished Equipment (GFE)
+               before departure.
+c.	Administrators ensure the artifact captures the disablement of the
+               users account within 72 hours.
+d.	Users transferring positions with their current Component will have
+               their access reviewed to ensure least privilege is enforced and the user only has the
+               access needed to complete their job responsibilities.
+2.	Involuntary Termination
+a.	In the event of an Involuntary Termination, the immediate action 
+the manager/supervisor or COR is to follow the Components Termination process.   At a minimum, Components should:
+(1)	Disable/obtain the PIV card to revoke the user’s access to DHS
+   facilities and systems.
+(2)	Immediately notify identity management system administrator AND affected systems administrators to disable terminated user accounts.
+3.	Notify in HR system of record and IT Service ticketing tool.
+4.	HR designated personnel or the COR begins the process for recovering GFE.
+5.	CORs offboard a contractor from their contract.
+6.	HR and designated HR representatives offboard federal employees and contractors when their last active contract expires.
+7.	Users’ network, personal identity verification record, personnel security record, financials applications, and high valued assets access must be inactivated or disabled on their last day of employment/contract via workflow.
+8.	Designated personnel responsible for offboarding shall receive notifications with offboarding checklists.
+9.	Review access of users transferring positions to ensure least privilege is enforced and the user only has the access needed to complete their job responsibilities.
+10.	Annual Recertification on Non-Privileged User accounts
+a.	User’s system access shall be reviewed on an annual basis to validate their required access based on role and need to know. User’s will need to take the annual CSAT and other role-based trainings before the recertification process.
+11.	User’s account will be deleted after 180 days of inactivity and/or deactivation. Required audit requirements will be retained.
+
+H.	Foreign Nationals
+Under normal circumstances, only U.S. citizens are allowed access to DHS systems and networks, but there is sometimes a need to grant access to foreign nationals. Access for foreign nationals is normally a long-term commitment and exceptions to citizenship requirements are treated differently from security policy waivers. Exceptions to the U.S. citizenship requirement can be requested by submitting a completed Foreign National Visitor Access Request form for each foreign national to the DHS OCSO. Any person of dual
+citizenship (one being U.S. citizenship) and any legal permanent resident who requires access to DHS systems as a validated representative of foreign power is processed as indicated in this section.
+For more information, consult DHS Policy Directive 4300A, Information Technology System Security Program, Sensitive Systems, and DHS Policy Directive 121-08, Requirements for Security Review of Foreign National Assignments and Overseas Employment.
+
+VII.	Questions
+Please address any questions, comments, or suggestions to infosecpolicy@hq.dhs.gov.
+
+
+ 
+ 
+Date: 2023.09.18
+16:11:47 -04'00'
+
+Chief Information Officer	Date
+ 
+Appendix A: DHS Privileged User Agreement
+
+I am being granted elevated access to [AGENCY or PROGRAM NAME] controlled systems and facilities and am responsible for all actions taken under my accounts. I agree to the following:
+
+1.	I will only use my elevated privileges to perform authorized tasks or mission-related functions on systems I am authorized to access.
+2.	I will not use my elevated privileges to perform routine tasks that do not require elevated access.
+3.	I will obtain and maintain required certifications and trainings according to [AGENCY OR PROGRAM POLICY], including but not limited to specialized role-based security and privacy training.
+4.	I understand the need to safeguard all credentials at the level appropriate to the data they protect.
+5.	I will not share passwords, accounts, or other credentials with unwanted personnel.
+6.	I will only add and remove users to the [ADMINISTRATOR GROUPS] group after receiving approval/direction from the [AGENCY OR PROGRAM POC].
+7.	I will not install, modify, or remove any hardware/software without written approval from the [AGENCY OR PROGRAM POC].
+8.	I will not knowingly introduce any viruses, malicious/unwanted code, malware, or Trojan horse programs into [AGENCY OR PROGRAM NAME] systems.
+9.	I will not attempt to hack the network or connected information systems, gain access to data or agency assets which I am authorized to access. I will not use sensitive information for anything other than the purpose for which it has been authorized.
+10.	I will contact the [AGENCY OR PROGRAM POC] if I require clarification of my roles/responsibilities.
+
+I understand that failure to comply with the above requirements may result in disciplinary action, including termination of employment; removal/disbarment from work on federal contracts/projects; revocation of access to federal information, information systems, and/or facilities; criminal penalties; and/or imprisonment. I also understand that violation of certain laws, such as the Privacy Act of 1974, copyright law, and 18 USC 2071 can result in monetary fines and criminal charges that may result in imprisonment.
+
+Printed Name:
+Date:
+Digital Signature (preferred):
